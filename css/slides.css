@@ -1,0 +1,80 @@
+.slides {
+  overflow: hidden;
+  background: #f0f0f0;
+}
+.slide {
+  width: 1024px;
+  height: 768px;
+  margin: 0 auto;
+  padding: 100px;
+  border: 0;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: -384px 0 0 -512px;
+  background: #fff;
+}
+.slide h2 {
+  font-size: 4em;
+  line-height: 1em;
+  text-align: center;
+  margin: 0 0 1em;
+}
+.slide h2 .continue {
+  font-size: 0.5em;
+  color: #bbb;
+  position: absolute;
+  top: -3.75em;
+  right: 1em;
+}
+.slide p {
+  font-size: 2em;
+  line-height: 1.4em;
+}
+.slide .body pre {
+  font-size: 24px;
+  line-height: 1.4em;
+}
+.slide .body > ul {
+  margin-bottom: 1em;
+}
+.slide ul li {
+  list-style: disc;
+  font-size: 30px;
+}
+.slide li p {
+  font-size: 1em;
+  margin: 0;
+  padding-bottom: 0.5em;
+}
+.slide.title,
+.slide.title-only {
+  display: table;
+  padding: 0;
+}
+.slide.title .body,
+.slide.title-only h1 {
+  display: table-cell;
+  vertical-align: middle;
+}
+.slide.title h1 {
+  text-align: center;
+  font-size: 5em;
+  margin-bottom: 0;
+}
+.slide.title p {
+  width: 512px;
+  margin: 0 auto;
+  line-height: 1.4em;
+  text-align: center;
+  padding-bottom: 1em;
+}
+.slide.title-only h1 {
+  text-align: center;
+  font-size: 5em;
+}
+.slide .youtube-embed {
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+}

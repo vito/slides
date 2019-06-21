@@ -1,0 +1,156 @@
+\title{Concourse v10}{v10}
+
+\use-plugin{slides}
+\styled{slides}
+
+\title-slide{Concourse v10}{
+  \youtube{YHRyirjO5rM}
+}
+
+\title-slide{\code{set_pipeline} step}
+
+\detail{\code{set_pipeline}}{
+  Pipelines can be configured by using a new \code{set_pipeline} step in a
+  build plan:
+
+  \codeblock{yaml}{{
+  plan:
+  - get: ci
+  - set_pipeline: concourse
+    file: ci/pipelines/concourse.yml
+  }}
+
+  The goal here is to deprecate the \code{concourse-pipeline} resource, which
+  is currently plagued by two problems: configuring auth, and keeping
+  \code{fly} in sync.
+}
+
+\title-slide{Introducing "Projects"}
+
+\detail{\code{fly set-project}}{
+  A project is a resource containing config for tasks, resources, pipelines,
+  and the project itself.
+
+  Projects are configured with \code{fly set-project}:
+
+  \codeblock{sh}{{
+    fly -t ci set-project \\
+      --name booklit \\
+      --type git \\
+      --source uri=https://github.com/vito/booklit \\
+      --path ci
+  }}
+
+  Many projects may exist within a team.
+}
+
+\detail{Project structure}{
+  Concourse will \code{check} for new versions of the project and load its
+  config from a \code{project.yml} file.
+
+  It will then load up all tasks, resources, and pipelines defined within the
+  project directory structure:
+
+  \codeblock{sh}{{
+  ci/project.yml
+  ci/tasks/test.yml
+  }}
+
+  This allows pipelines to shrink down to just job definitions, removing
+  hundreds of lines of YAML.
+}
+
+\detail{It's just a build plan!}{
+  A minimal project configuration contains a \code{name} and a \code{plan}:
+
+  \codeblock{yaml}{{
+  name: booklit
+  plan:
+  - task: test
+  }}
+
+  The project's \code{plan:} will run every time a new version of the project
+  is found, and will have the project resource itself available under the
+  project's name.
+}
+
+\detail{Smoother learning curve}{
+  This accomplishes a Travis/Circle CI -like workflow. Sometimes this is all
+  you need.
+
+  At this point, the user will be introduced to resources, tasks, and build
+  plans.
+
+  If and when they need to take the next step, then they can start using
+  pipelines.
+
+  By then, the only new concept is \code{passed} constraints.
+}
+
+\detail{Git Ops}{
+  Projects, when combined with the \code{set_pipeline} step, allow your entire
+  project to be automated and reproducible:
+
+  \codeblock{yaml}{{
+  name: ci
+  plan:
+  - set_pipeline: concourse
+  - task: generate-template
+  - set_pipeline: fancy-templated-pipeline
+    file: generated-pipeline/foo.yml
+  - set_pipeline: release-5.2.x
+    pipeline: release # pipelines/release.yml
+    vars: # ...
+  }}
+}
+
+\detail{Pipelines within projects}{
+  Pipelines within a project change in a few ways:
+
+  \list{
+    Every job will automatically have the project resource available to its
+    build plan, just like the project's own \code{plan}.
+  }{
+    Pipelines will no longer list their own resource definitions. Instead,
+    there will be project-wide resource definitions.
+  }{
+    Pipelines will be able to reference each other's jobs via \code{passed}
+    constraints. This will become more important later.
+  }
+}
+
+\detail{Project-level creds}{
+  Projects define credential managers as \code{var_sources}:
+
+  \codeblock{yml}{{
+  name: ci
+
+  var_sources:
+  - type: vault
+    config: # ...
+
+  plan: # ...
+  }}
+
+  The proximity to \code{plan:} makes it easy to audit credential access within
+  the project.
+}
+
+\detail{Why projects?}{
+  \list{
+    Git Ops, in its embryonic stage.
+  }{
+    A middle ground between \code{fly execute} and \code{fly set-pipeline},
+    perfectly valid for small projects.
+  }{
+    Cross-pipeline \code{passed} constraints.
+  }
+}
+
+\title-slide{Archiving Pipelines}
+
+\title-slide{\code{across} step}
+
+\title-slide{Instanced Pipelines}
+
+\title-slide{Spaces!}

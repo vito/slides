@@ -1,0 +1,139 @@
+@highlight: #ffffdc;
+
+@off-white: #f6f5f5;
+@offer-white: #efeeee;
+@offest-white: #e6e5e5;
+
+@light-grey: #5a5555;
+
+@dark-grey: #3d3c3c;
+@darker-grey: #2a2929;
+@darkest-grey: #1e1d1d;
+
+@green-primary: #11c560;
+@green-secondary: #419867;
+@amber-primary: #f5a623;
+@amber-secondary: #ec9910;
+@red-primary: #ed4b35;
+@red-secondary: #bd3826;
+@blue-primary: #4a90e2;
+@blue-secondary: #2d76cc;
+@grey-primary: #9b9b9b;
+@grey-secondary: #7a7373;
+@brown-primary: #8b572a;
+@brown-secondary: #6a401c;
+
+@brand: #3398dc;
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: @darker-grey;
+  background: @off-white;
+  width: 100%;
+}
+
+a {
+  color: @blue-secondary;
+}
+
+a:hover {
+  color: @blue-primary;
+}
+
+a:visited {
+  color: @grey-secondary;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code, pre {
+  font-family: 'Iosevka', monospace;
+}
+
+pre {
+  background: @offer-white;
+  color: @dark-grey;
+  padding: .5rem;
+  overflow-x: auto;
+
+  /* kind of a hack tbh but happens to make various code samples fit better
+   * narrow spaces like the examples pane and front page */
+  font-size: .9em;
+}
+
+p:first-child, pre:first-child {
+  margin-top: 0;
+}
+
+p:last-child, pre:last-child {
+  margin-bottom: 0;
+}
+
+li, dd {
+  margin-bottom: 1em;
+}
+
+li:last-child,
+dd:last-child {
+  margin-bottom: 0;
+}
+
+dt code,
+p code {
+  font-size: .9em;
+}
+
+code code {
+  font-size: 1em;
+}
+
+table, tr, td {
+  padding: 0;
+  border-collapse: collapse;
+}
+
+h1 code, h2 code, h3 code {
+  font-weight: 600;
+  font-size: .9em;
+}
+
+nav ul {
+  list-style-type: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Roboto Slab', serif;
+  font-weight: normal;
+}
+
+h1 {
+  font-size: 32px;
+  margin-top: 0;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+h2, h3 {
+  margin-top: 2rem;
+}
