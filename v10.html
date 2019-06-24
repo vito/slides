@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/normalize.css" />
+    <link rel="stylesheet" type="text/css" href="css/iosevka.css" />
+    <link rel="stylesheet" type="text/css" href="css/booklit.css" />
+    <link rel="stylesheet" type="text/css" href="css/slides.css" />
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans:400,400i,700|Roboto+Slab:300,400,700" rel="stylesheet" />
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.hotkeys.js"></script>
+    <script src="js/slides.js"></script>
+    <title>Concourse v10</title>
+  </head>
+  <body class="slides">
+    <div class="slide title">
+  <div class="body">
+    <h1>Concourse v10</h1>
+
+    <iframe class="youtube-embed" width="500" height="315" src="https://www.youtube.com/embed/YHRyirjO5rM?controls=0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1><code>set_pipeline</code> step</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>set_pipeline</code> <span class="continue">(cont'd)</span></h2>
+
+    <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><div class="highlight"><pre style="">plan:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
+</span></pre></div><p>The pipeline will be set within the team running the build.</p><p>With this we can deprecate the <code>concourse-pipeline</code> resource.</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1><code>across</code> step</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code> step <span class="continue">(cont'd)</span></h2>
+
+    <p>An <code>across</code> step runs a given step across all versions of a resource:</p><div class="highlight"><pre style="">across:<span style="color:#e6e7e8"> </span>concourse-branch<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>do:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>branch<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>var_files:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">    </span>branch_name:<span style="color:#e6e7e8"> </span>concourse-branch/name<span style="color:#e6e7e8">
+</span></pre></div>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1>Archiving Pipelines</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Archiving Pipelines <span class="continue">(cont'd)</span></h2>
+
+    <p>Pipelines can be archived when they are no longer needed.</p><p>When archived, a pipeline becomes completely inactive, and its name can be used for later pipelines. This is basically a soft-delete.</p><div class="highlight"><pre style="">$ fly archive-pipeline -p pipeline-name
+</pre></div><p>This is a pretty simple feature on its own, but it&#39;s also a precursor to &#34;instanced pipelines.&#34;</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1>Instanced Pipelines</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Instanced Pipelines <span class="continue">(cont'd)</span></h2>
+
+    <p>Pipeline templates can be &#34;instantiated&#34; with vars that become part of the pipeline&#39;s identifier.</p><div class="highlight"><pre style="">set_pipeline:<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>instance_vars:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>version:<span style="color:#e6e7e8"> </span><span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8">
+</span></pre></div><p>A build sets all instances of a pipeline - any other instances that were not set by the build become auto-archived. (This will be important later.)</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1>Projects</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>fly set-project</code> <span class="continue">(cont'd)</span></h2>
+
+    <p>A project is a resource containing config for tasks, resources, pipelines, and the project itself.</p><p>Projects are configured with <code>fly set-project</code>:</p><div class="highlight"><pre style="">fly -t ci set-project <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  --name booklit <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  --type git <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  --source <span style="color:#3498db">uri</span>=https://github.com/vito/booklit <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  --path ci
+</pre></div><p>Many projects may exist within a team.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Project structure <span class="continue">(cont'd)</span></h2>
+
+    <p>Concourse will <code>check</code> for new versions of the project and load its config from a <code>project.yml</code> file.</p><p>It will then load up all tasks, resources, and pipelines defined within the project directory structure:</p><div class="highlight"><pre style="">ci/project.yml
+ci/tasks/test.yml
+</pre></div><p>This allows pipelines to shrink down to just job definitions, removing hundreds of lines of YAML.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>It&#39;s just a build plan! <span class="continue">(cont'd)</span></h2>
+
+    <p>A minimal project configuration contains a <code>name</code> and a <code>plan</code>:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>booklit<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>task:<span style="color:#e6e7e8"> </span>test<span style="color:#e6e7e8">
+</span></pre></div><p>The project&#39;s <code>plan:</code> will run every time a new version of the project is found. The build output will be visible in the UI.</p><p>The project&#39;s code will available to each build executed in the project under the project&#39;s name.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Git Ops <span class="continue">(cont'd)</span></h2>
+
+    <p>Projects, when combined with the <code>set_pipeline</code> step, allow your entire project to be automated and reproducible:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>task:<span style="color:#e6e7e8"> </span>generate-template<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>fancy-templated-pipeline<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>generated-pipeline/foo.yml<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>release-<span style="color:#1abc9c;font-weight:bold">5.2</span>.x<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>pipeline:<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># pipelines/release.yml</span><span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>vars:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
+</span></pre></div>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Pipelines within projects <span class="continue">(cont'd)</span></h2>
+
+    <p>Pipelines within a project change in a few ways:</p><ul>
+
+  <li><p>Every job will automatically have the project resource available to its build plan, just like the project&#39;s own <code>plan</code>.</p></li>
+
+  <li><p>Pipelines will no longer list their own resource definitions. Instead, there will be project-wide resource definitions.</p></li>
+
+  <li><p>Pipelines will be able to reference each other&#39;s jobs via <code>passed</code> constraints. This is the missing piece for &#39;spaces&#39;.</p></li>
+
+</ul>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Project-level creds <span class="continue">(cont'd)</span></h2>
+
+    <p>Projects define credential managers as <code>var_sources</code>:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>var_sources:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>type:<span style="color:#e6e7e8"> </span>vault<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>config:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
+</span></pre></div><p>The proximity to <code>plan:</code> makes it easy to audit credential access within the project.</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1>Putting it all together...</h1>
+
+    <p></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Demo 1: simple project <span class="continue">(cont'd)</span></h2>
+
+    <pre>name: booklit
+plan:
+- task: test</pre><div class="highlight"><pre style="">fly set-project -p booklit -t git <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  -s <span style="color:#3498db">uri</span>=https://github.com/vito/booklit
+</pre></div><p>This should feel intuitive for smaller projects which may not need a sophisticated pipeline system. Concourse has been described as &#39;overkill&#39; for such use cases - hopefully this bridges the gap.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Demo 2: git ops project <span class="continue">(cont'd)</span></h2>
+
+    <pre>name: ci
+var_sources:
+- type: vault
+  config: # ...
+plan:
+- <strong>set_pipeline</strong>: concourse
+- <strong>set_pipeline</strong>: prs</pre><p>Though in this case it might make more sense for <code>prs</code> to be a separate project so it doesn&#39;t share the credential manager config. (Or maybe we could have pipelines associated to credential managers?)</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Demo 3: spatial pipelines <span class="continue">(cont'd)</span></h2>
+
+    <pre><strong>name</strong>: ci
+<strong>plan</strong>:
+- <strong>set_pipeline</strong>: concourse
+- <strong>across</strong>: branch
+  resource: release-branches
+  do:
+    <strong>set_pipeline</strong>: release
+    <strong>instance_fragment</strong>: branch
+- <strong>across</strong>: branch
+  resource: feature-branches
+  do:
+    <strong>set_pipeline</strong>: branch
+    <strong>instance_fragment</strong>: branch</pre>
+  </div>
+</div><div class="slide">
+  <div class="body">
+    <h2>Broken metaphor</h2>
+
+    <p>...Ok, the Exodia metaphor is a little broken.</p><p>With Exodia, each card on its own is completely worthless until you have all five.</p><p>The entire point of this roadmap is that each feature is useful independently.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Better metaphor? <span class="continue">(cont'd)</span></h2>
+
+    <p>A better metaphor would be &#34;Blue Eyes White Dragon&#34;:</p><div style="text-align: center"><p>   = </p></div><p>...but we have five features, not three.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Better metaphor? <span class="continue">(cont'd)</span></h2>
+
+    <p>And we all know how that turned out anyway.</p><div style="text-align: center"><p> </p></div>
+  </div>
+</div><div class="slide">
+  <div class="body">
+    <h2>What about spaces?</h2>
+
+    <p>Let&#39;s peel back the name for a second and see what &#39;spaces&#39; really is:</p><ul>
+
+  <li><p>Dynamically running pipelines across branches and PRs.</p></li>
+
+  <li><p>&#34;Fanning in&#34; across spaces - something that&#39;s impossible with pipelines.</p></li>
+
+  <li><p>Automatically cleaning up spaces which no longer exist.</p></li>
+
+</ul>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>What about spaces? <span class="continue">(cont'd)</span></h2>
+
+    <p>...and let&#39;s see how these features accomplish those goals:</p><ul>
+
+  <li><p>Dynamically running pipelines across branches and PRs: <strong>projects</strong> &#43; <strong><code>across</code> step</strong> &#43; <strong><code>set_pipeline</code> step</strong>.</p></li>
+
+  <li><p>&#34;Fanning in&#34; across spaces: <strong>projects</strong> enable cross-pipeline <code>passed</code> constraints.</p></li>
+
+  <li><p>Automatically cleaning up spaces which no longer exist: <strong>instanced pipelines</strong> become automatically <strong>archived</strong>.</p></li>
+
+</ul>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1>Outcomes</h1>
+
+    <p>Let&#39;s reflect on what this all means.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Scales with more projects <span class="continue">(cont'd)</span></h2>
+
+    <p><strong>Projects</strong> accomplish a Travis/Circle CI -like workflow. For simpler projects this may be all you need.</p><p>At this point, the user will be introduced to resources, tasks, and build plans.</p><p>If and when they need to take the next step, then they can start using pipelines and adopt a &#34;<code>git</code> ops&#34; workflow.</p><p>By then, the only new concept is <code>passed</code> constraints.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Fan-in across pipelines <span class="continue">(cont'd)</span></h2>
+
+    <p><strong>Projects</strong> allow pipelines to reference each other in <code>passed</code> constraints.</p><p>This way users can configure independent pipelines for &#39;matrix&#39; style workflows, i.e. testing across IaaSes.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Pipeline automation <span class="continue">(cont'd)</span></h2>
+
+    <p>The <strong><code>set_pipeline</code> step</strong> allows for pipelines to be configured as part of a build plan.</p><p>Along the way, we can deprecate the <code>concourse-pipeline</code> resource, which has two smelly problems:</p><ul>
+
+  <li><p>authenticating with Concourse</p></li>
+
+  <li><p>keeping <code>fly</code> in sync with your Concourse version</p></li>
+
+</ul>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Pipeline sub-naming <span class="continue">(cont'd)</span></h2>
+
+    <p><strong>Pipeline instances</strong> allow for a common pipeline template to use some of its <code>((vars))</code> as part of the pipeline identifier.</p><p>This removes a lot of the need for &#39;hierarchical pipelines&#39;, which has been trotted around as an idea for a long time.</p><p>Pipeline instances should feel less complicated than arbitrary hierarchies (depth 2 is simpler than depth N).</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Build/pipeline matrixes <span class="continue">(cont'd)</span></h2>
+
+    <p>The <strong><code>across</code> step</strong> is the true &#39;root&#39; of spatial automation. And because it just happens within a single build, it&#39;s a <em>lot</em> easier to reason about.</p><p>By composing the <code>across</code> step with the <strong><code>set_pipeline</code> step</strong>, the mechanics of spatial pipelines should also be pretty easy to reason about.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>De-risked roadmap <span class="continue">(cont'd)</span></h2>
+
+    <p>For a long while now &#39;spaces&#39; has been thought of as one big feature with a whole lot of implications.</p><p>By thinking about it as the intersection of five smaller features, our roadmap is heavily de-risked.</p>
+  </div>
+</div>
+  </body>
+</html>
