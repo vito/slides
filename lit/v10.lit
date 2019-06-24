@@ -8,7 +8,7 @@
 }
 
 \title-slide{\code{set_pipeline} step}{
-  \image{img/exodia-right-arm.png}
+  \exodia{img/exodia-right-arm.png}
 }
 
 \detail{\code{set_pipeline}}{
@@ -28,7 +28,7 @@
 }
 
 \title-slide{\code{across} step}{
-  \image{img/exodia-left-arm.png}
+  \exodia{img/exodia-left-arm.png}
 }
 
 \detail{\code{across} step}{
@@ -44,7 +44,7 @@
 }
 
 \title-slide{Archiving Pipelines}{
-  \image{img/exodia-right-leg.png}
+  \exodia{img/exodia-right-leg.png}
 }
 
 \detail{Archiving Pipelines}{
@@ -62,7 +62,7 @@
 }
 
 \title-slide{Instanced Pipelines}{
-  \image{img/exodia-left-leg.png}
+  \exodia{img/exodia-left-leg.png}
 }
 
 \detail{Instanced Pipelines}{
@@ -80,7 +80,7 @@
 }
 
 \title-slide{Projects}{
-  \image{img/exodia-head.png}
+  \exodia{img/exodia-head.png}
 }
 
 \detail{\code{fly set-project}}{
@@ -132,19 +132,6 @@
   the project's name.
 }
 
-\detail{Smoother learning curve}{
-  This accomplishes a Travis/Circle CI -like workflow. Sometimes this is all
-  you need.
-
-  At this point, the user will be introduced to resources, tasks, and build
-  plans.
-
-  If and when they need to take the next step, then they can start using
-  pipelines.
-
-  By then, the only new concept is \code{passed} constraints.
-}
-
 \detail{Git Ops}{
   Projects, when combined with the \code{set_pipeline} step, allow your entire
   project to be automated and reproducible:
@@ -173,7 +160,7 @@
     there will be project-wide resource definitions.
   }{
     Pipelines will be able to reference each other's jobs via \code{passed}
-    constraints. This will become more important later.
+    constraints. This is the missing piece for 'spaces'.
   }
 }
 
@@ -194,19 +181,8 @@
   the project.
 }
 
-\detail{Why projects?}{
-  \list{
-    Git Ops, in its embryonic stage.
-  }{
-    A middle ground between \code{fly execute} and \code{fly set-pipeline},
-    perfectly valid for small projects.
-  }{
-    Cross-pipeline \code{passed} constraints.
-  }
-}
-
 \title-slide{Putting it all together...}{
-  \image{img/exodia-together.jpg}
+  \exodia{img/exodia-together.jpg}
 }
 
 \detail{Demo 1: simple project}{
@@ -260,65 +236,130 @@
   }}
 }
 
-\detail{Outcomes}{
-  \list{
-    De-risked roadmap: composes 5 smaller features instead of implementing 1
-    big one (spaces).
-  }{
-    A familiar workflow for small projects, with a more gradual learning curve.
-  }{
-    A reproducible "\code{git} ops" workflow especially valuable for large
-    projects.
-  }{
-    A pattern for automatically reconfiguring pipelines within a project.
-  }{
-    A simple and consistent structure for project repositories, allowing
-    pipeline configs to shrink.
-  }{
-    Pipelines feel like more complete, instead of just being the outermost
-    shell with no meaning or automation of its own.
-  }{
-    Replacement of the \code{concourse-pipeline} resource.
-  }{
-    Build matrixes are possible with the \code{across} step and intuitively
-    extend to pipeline matrixes with the \code{set_pipeline} step.
-  }{
-    Pipeline "instances" likely removes the need for hierarchical pipelines,
-    while being more intuitive and useful in general
+\slide{Broken metaphor}{
+  ...Ok, the Exodia metaphor is a little broken.
+
+  With Exodia, each card on its own is completely worthless until you have all
+  five.
+
+  The entire point of this roadmap is that each feature is useful
+  independently.
+}
+
+\detail{Better metaphor?}{
+  A better metaphor would be "Blue Eyes White Dragon":
+
+  \center{
+    \exodia{img/blue-eyes-white-dragon.png}{small-card}
+    \exodia{img/blue-eyes-white-dragon.png}{small-card}
+    \exodia{img/blue-eyes-white-dragon.png}{small-card}
+    =
+    \exodia{img/blue-eyes-ultimate-dragon.png}{small-card}
+  }
+
+  ...but we have five features, not three.
+}
+
+\detail{Better metaphor?}{
+  And we all know how that turned out anyway.
+
+  \center{
+    \exodia{img/yugi-exodia-head.jpg}{small-screen}
+    \exodia{img/kaiba.png}{small-screen}
   }
 }
 
-\detail{When do we start?}{
-  \italic{Today.}
-}
-
-{-
-  This roadmap is based on 5 features which can be implemented in any order and
-  delivered one by one.
-
-  So instead of working on "spaces" for a year, we can 
-}
+\slide{What about spaces?}{
+  Let's peel back the name for a second and see what 'spaces' really is:
 
   \list{
-    A roadmap based on 5 independently valuable features, able to be
-    implemented in any order and delivered one by one.
+    Dynamically running pipelines across branches and PRs.
   }{
-    All of the goals of "spaces", by composing smaller, simpler ideas.
+    "Fanning in" across spaces - something that's impossible with pipelines.
   }{
-    A more gradual learning curve for new Concourse users.
-  }{
-    A simpler usage pattern suitable for small-scale projects.
-  }{
-    Git Ops, for larger projects.
+    Automatically cleaning up spaces which no longer exist.
   }
-
-  set_pipeline: opens the floodgates for pipeline automation
-
-  projects: passed constraints across pipelines instances
-
-  archiving + instances: allows pipelines for deleted branches and merged PRs
-  to automatically go away
-
-  across: allows auto-configuring pipelines for PRs and branches
 }
--}
+
+\detail{What about spaces?}{
+  ...and let's see how these features accomplish those goals:
+
+  \list{
+    Dynamically running pipelines across branches and PRs: \bold{projects} +
+    \bold{\code{across} step} + \bold{\code{set_pipeline} step}.
+  }{
+    "Fanning in" across spaces: \bold{projects} enable cross-pipeline
+    \code{passed} constraints.
+  }{
+    Automatically cleaning up spaces which no longer exist: \bold{instanced
+    pipelines} become automatically \bold{archived}.
+  }
+}
+
+\title-slide{Outcomes}{
+  Let's reflect on what this all means.
+}
+
+\detail{Scales with more projects}{
+  \bold{Projects} accomplish a Travis/Circle CI -like workflow. For simpler
+  projects this may be all you need.
+
+  At this point, the user will be introduced to resources, tasks, and build
+  plans.
+
+  If and when they need to take the next step, then they can start using
+  pipelines and adopt a "\code{git} ops" workflow.
+
+  By then, the only new concept is \code{passed} constraints.
+}
+
+\detail{Fan-in across pipelines}{
+  \bold{Projects} allow pipelines to reference each other in \code{passed}
+  constraints.
+
+  This way users can configure independent pipelines for 'matrix' style
+  workflows, i.e. testing across IaaSes.
+}
+
+\detail{Pipeline automation}{
+  The \bold{\code{set_pipeline} step} allows for pipelines to be configured as
+  part of a build plan.
+
+  Along the way, we can deprecate the \code{concourse-pipeline} resource, which
+  has two smelly problems:
+
+  \list{
+    authenticating with Concourse
+  }{
+    keeping \code{fly} in sync with your Concourse version
+  }
+}
+
+\detail{Pipeline sub-naming}{
+  \bold{Pipeline instances} allow for a common pipeline template to use some of
+  its \code{((vars))} as part of the pipeline identifier.
+
+  This removes a lot of the need for 'hierarchical pipelines', which has been
+  trotted around as an idea for a long time.
+
+  Pipeline instances should feel less complicated than arbitrary hierarchies
+  (depth 2 is simpler than depth N).
+}
+
+\detail{Build/pipeline matrixes}{
+  The \bold{\code{across} step} is the true 'root' of spatial automation. And
+  because it just happens within a single build, it's a \italic{lot} easier to
+  reason about.
+
+  By composing the \code{across} step with the \bold{\code{set_pipeline} step},
+  the mechanics of spatial pipelines should also be pretty easy to reason
+  about.
+}
+
+\detail{De-risked roadmap}{
+  For a long while now 'spaces' has been thought of as one big feature with a
+  whole lot of implications.
+
+  By thinking about it as the intersection of five smaller features, our
+  roadmap is heavily de-risked.
+}
