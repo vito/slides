@@ -23,6 +23,31 @@ func NewPlugin(section *booklit.Section) booklit.Plugin {
 	}
 }
 
+func (p Plugin) Exodia(path string, style ...string) booklit.Content {
+	return booklit.Empty
+	// content := booklit.Image{
+	// 	Path:        path,
+	// 	Description: "",
+	// }
+
+	// if len(style) > 0 {
+	// 	return booklit.Styled{
+	// 		Style:   booklit.Style(style[0]),
+	// 		Content: content,
+	// 	}
+	// } else {
+	// 	return content
+	// }
+}
+
+func (p Plugin) Center(content booklit.Content) booklit.Content {
+	return booklit.Styled{
+		Style:   "center",
+		Content: content,
+		Block:   true,
+	}
+}
+
 func (p Plugin) TitleSlide(title booklit.Content, subtitle ...booklit.Content) booklit.Content {
 	var style booklit.Style = "title-slide"
 	partials := booklit.Partials{}
