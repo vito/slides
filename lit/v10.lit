@@ -7,12 +7,12 @@
   \youtube{YHRyirjO5rM}
 }
 
-\title-slide{Spaces}{
-  Concourse's White Whale
+\title-slide{RIP Spaces}{
+  2017-2019
 }
 
-\detail{What is spaces?}{
-  Let's peel away one layer and see what 'spaces' is about:
+\detail{What was spaces?}{
+  Let's peel away one layer and see what 'spaces' was about:
 
   \list{
     Dynamically running jobs across 'spatial' change, i.e. branches and PRs.
@@ -22,40 +22,39 @@
     Automatically cleaning up spaces for closed PRs, etc.
   }
 
-  Our initial approach was to \bold{extend} jobs and resources to support run
-  across many spaces.
+  Our initial approach was to \bold{extend} jobs and resources to support
+  running builds and detecting versions across many spaces.
 }
 
-\detail{Feature paralysis}{
-  This initial approach sounded simple but proved to be strategically
-  expensive.
+\detail{Analysis paralysis}{
+  This approach proved to be strategically expensive.
 
-  This whole time it's been thought of as one feature, and we baked it into the
-  entire stack.
+  We thought of it as one, and we baked it into the entire stack.
 
   Having a single feature touch so many things is scary and involves a lot of
-  second-guessing. This causes delays.
+  second-guessing.
 
-  Analysis paralysis is real.
+  This caused delays.
 }
 
-\detail{A new approach}{
-  The \bold{new} new resource interface is no longer coupled to 'spaces.'
+\detail{Learning to walk again}{
+  Let's tackle the root of the problem: it's one big feature, spanning the
+  entire stack.
 
-  Instead, we've made the resource concept more general. We'll focus on
-  pipeline-level semantics and composing resources with each other instead.
+  We recently de-coupled the 'resources v2' interface from 'spaces' by
+  generalizing the interface and leveraging composition instead.
 
-  Doing this really helped de-risk the roadmap; now instead of 1 big feature we
-  had 2 independent ones.
+  Doing this was liberating: suddenly we could deliver two big features
+  independently instead of all at once.
 
-  I think I found a way to do the same for 'spaces' itself.
+  I think I have a plan to do the same for 'spaces'.
 }
 
 \title-slide{\code{set_pipeline} step}{
   \exodia{img/exodia-right-arm.png}
 }
 
-\detail{\code{set_pipeline}}{
+\detail{\code{set_pipeline} step}{
   Pipelines can be configured by using a new \code{set_pipeline} step in a
   build plan:
 
@@ -233,6 +232,20 @@
   \exodia{img/exodia-together.jpg}
 }
 
+\detail{Spaces!}{
+  Circling back to 'spaces', let's see how these features add up:
+
+  \list{
+    Dynamically running pipelines across branches and PRs: \bold{projects} +
+    \bold{\code{across} step} + \bold{\code{set_pipeline} step}.
+  }{
+    "Fanning in" across spaces is possible with \bold{projects}.
+  }{
+    Automatically cleaning up spaces which no longer exist: \bold{instanced
+    pipelines} become automatically \bold{archived}.
+  }
+}
+
 \detail{Demo 1: simple project}{
   \code{{
   name: booklit
@@ -317,21 +330,8 @@
   }
 }
 
-\slide{Spaces!}{
-  Circling back to 'spaces', let's see how these features add up:
-
-  \list{
-    Dynamically running pipelines across branches and PRs: \bold{projects} +
-    \bold{\code{across} step} + \bold{\code{set_pipeline} step}.
-  }{
-    "Fanning in" across spaces: \bold{projects} enable cross-pipeline
-    \code{passed} constraints.
-  }{
-    Automatically cleaning up spaces which no longer exist: \bold{instanced
-    pipelines} become automatically \bold{archived}.
-  }
-
-  ...but along the way, we've delivered a bunch of other outcomes.
+\title-slide{Outcomes}{
+  What will we have achieved?
 }
 
 \detail{Scales with more projects}{
