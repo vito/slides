@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e -u -x
+
+cd $(dirname $0)/..
+
+if ! [ -d gh-pages ]; then
+  git clone https://github.com/vito/slides --branch gh-pages gh-pages
+fi
+
+pushd gh-pages
+  git fetch origin master
+  git merge origin/master
+popd
+
+./scripts/build -o gh-pages
+
+pushd gh-pages
+  git add *.html search_index.json
+  git commit -m "build"
+  git push origin gh-pages
+popd
