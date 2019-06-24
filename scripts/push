@@ -10,13 +10,13 @@ fi
 
 pushd gh-pages
   git fetch origin master
-  git merge origin/master
+  git merge --no-edit origin/master
 popd
 
 ./scripts/build -o gh-pages
 
 pushd gh-pages
   git add *.html search_index.json
-  git commit -m "build"
+  git commit --allow-empty -m "build"
   git push origin gh-pages
 popd
