@@ -21,6 +21,38 @@
   </div>
 </div><div class="slide title">
   <div class="body">
+    <h1>Spaces</h1>
+
+    <p>Concourse&#39;s White Whale</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>What is spaces? <span class="continue">(cont'd)</span></h2>
+
+    <p>Let&#39;s peel away one layer and see what &#39;spaces&#39; is about:</p><ul>
+
+  <li><p>Dynamically running jobs across &#39;spatial&#39; change, i.e. branches and PRs.</p></li>
+
+  <li><p>&#34;Fanning in&#34; using <code>passed</code> constraints across spaces.</p></li>
+
+  <li><p>Automatically cleaning up spaces for closed PRs, etc.</p></li>
+
+</ul><p>Our initial approach was to <strong>extend</strong> jobs and resources to support run across many spaces.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Feature paralysis <span class="continue">(cont'd)</span></h2>
+
+    <p>This initial approach sounded simple but proved to be strategically expensive.</p><p>This whole time it&#39;s been thought of as one feature, and we baked it into the entire stack.</p><p>Having a single feature touch so many things is scary and involves a lot of second-guessing. This causes delays.</p><p>Analysis paralysis is real.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>A new approach <span class="continue">(cont'd)</span></h2>
+
+    <p>The <strong>new</strong> new resource interface is no longer coupled to &#39;spaces.&#39;</p><p>Instead, we&#39;ve made the resource concept more general. We&#39;ll focus on pipeline-level semantics and composing resources with each other instead.</p><p>Doing this really helped de-risk the roadmap; now instead of 1 big feature we had 2 independent ones.</p><p>I think I found a way to do the same for &#39;spaces&#39; itself.</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
     <h1><code>set_pipeline</code> step</h1>
 
     <p><img src="img/exodia-right-arm.png" alt="" /></p>
@@ -45,12 +77,12 @@
   <div class="body">
     <h2><code>across</code> step <span class="continue">(cont'd)</span></h2>
 
-    <p>An <code>across</code> step runs a given step across all versions of a resource:</p><div class="highlight"><pre style="">across:<span style="color:#e6e7e8"> </span>concourse-branch<span style="color:#e6e7e8">
+    <p>An <code>across</code> step runs a given step across all config fragments (i.e. versions) returned by a resource <code>check</code>:</p><div class="highlight"><pre style="">across:<span style="color:#e6e7e8"> </span>concourse-branch<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>do:<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>branch<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">  </span>var_files:<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">    </span>branch_name:<span style="color:#e6e7e8"> </span>concourse-branch/name<span style="color:#e6e7e8">
-</span></pre></div>
+</span></pre></div><p>This is the beginning of &#39;spatial resources&#39; which return a config fragment for each space.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -222,23 +254,9 @@ plan:
   </div>
 </div><div class="slide">
   <div class="body">
-    <h2>What about spaces?</h2>
+    <h2>Spaces!</h2>
 
-    <p>Let&#39;s peel back the name for a second and see what &#39;spaces&#39; really is:</p><ul>
-
-  <li><p>Dynamically running pipelines across branches and PRs.</p></li>
-
-  <li><p>&#34;Fanning in&#34; across spaces - something that&#39;s impossible with pipelines.</p></li>
-
-  <li><p>Automatically cleaning up spaces which no longer exist.</p></li>
-
-</ul>
-  </div>
-</div><div class="slide continue">
-  <div class="body">
-    <h2>What about spaces? <span class="continue">(cont'd)</span></h2>
-
-    <p>...and let&#39;s see how these features accomplish those goals:</p><ul>
+    <p>Circling back to &#39;spaces&#39;, let&#39;s see how these features add up:</p><ul>
 
   <li><p>Dynamically running pipelines across branches and PRs: <strong>projects</strong> &#43; <strong><code>across</code> step</strong> &#43; <strong><code>set_pipeline</code> step</strong>.</p></li>
 
@@ -246,13 +264,7 @@ plan:
 
   <li><p>Automatically cleaning up spaces which no longer exist: <strong>instanced pipelines</strong> become automatically <strong>archived</strong>.</p></li>
 
-</ul>
-  </div>
-</div><div class="slide title">
-  <div class="body">
-    <h1>Outcomes</h1>
-
-    <p>Let&#39;s reflect on what this all means.</p>
+</ul><p>...but along the way, we&#39;ve delivered a bunch of other outcomes.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -295,6 +307,26 @@ plan:
     <h2>De-risked roadmap <span class="continue">(cont'd)</span></h2>
 
     <p>For a long while now &#39;spaces&#39; has been thought of as one big feature with a whole lot of implications.</p><p>By thinking about it as the intersection of five smaller features, our roadmap is heavily de-risked.</p>
+  </div>
+</div><div class="slide">
+  <div class="body">
+    <h2>References</h2>
+
+    <ul>
+
+  <li><p><a href="https://github.com/concourse/concourse/issues/1707">#1707</a> Spatial resource flows</p></li>
+
+  <li><p><a href="https://github.com/concourse/concourse/issues/1200">#1200</a> How do you use <code>fly set-pipeline</code>?</p></li>
+
+  <li><p><a href="https://github.com/concourse/concourse/issues/523">#523</a> Hierarchical pipelines</p></li>
+
+  <li><p><a href="https://github.com/concourse/concourse/issues/1994">#1994</a> Split pipelines up; simple templating</p></li>
+
+  <li><p><a href="https://github.com/concourse/concourse/issues/3985">#3985</a> Stricter naming conventions</p></li>
+
+  <li><p><a href="https://github.com/concourse/rfcs/pull/21">RFC #21</a> <span style="text-decoration: line-through">Team</span>Project credential managers</p></li>
+
+</ul>
   </div>
 </div>
   </body>
