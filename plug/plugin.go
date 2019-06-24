@@ -24,20 +24,19 @@ func NewPlugin(section *booklit.Section) booklit.Plugin {
 }
 
 func (p Plugin) Exodia(path string, style ...string) booklit.Content {
-	return booklit.Empty
-	// content := booklit.Image{
-	// 	Path:        path,
-	// 	Description: "",
-	// }
+	content := booklit.Image{
+		Path:        path,
+		Description: "",
+	}
 
-	// if len(style) > 0 {
-	// 	return booklit.Styled{
-	// 		Style:   booklit.Style(style[0]),
-	// 		Content: content,
-	// 	}
-	// } else {
-	// 	return content
-	// }
+	if len(style) > 0 {
+		return booklit.Styled{
+			Style:   booklit.Style(style[0]),
+			Content: content,
+		}
+	} else {
+		return content
+	}
 }
 
 func (p Plugin) Center(content booklit.Content) booklit.Content {
