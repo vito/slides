@@ -65,9 +65,14 @@
     file: ci/pipelines/concourse.yml
   }}
 
-  The pipeline will be set within the team running the build.
+  The pipeline will be set within the team running the build, and will start
+  un-paused.
+}
 
-  With this we can deprecate the \code{concourse-pipeline} resource.
+\detail{\code{set_pipeline} complexity}{
+  Not much. This could probably be done in a 'freedom friday'.
+
+  We can then immediately deprecate the \code{concourse-pipeline} resource.
 }
 
 \title-slide{\code{across} step}{
@@ -90,6 +95,16 @@
   for each space.
 }
 
+\detail{\code{across} complexity}{
+  There are interesting core and UI implications here, but nothing too crazy.
+
+  We'll run a \code{check} to find all the versions, and generate one step tree
+  for each - similar to the \code{retry} step, at least in the UI.
+
+  Later we'll want to support \code{trigger: true}. That'll be interesting but
+  it seems pretty easy to reason about at least.
+}
+
 \title-slide{Archiving Pipelines}{
   \exodia{img/exodia-right-leg.png}
 }
@@ -108,6 +123,11 @@
   "instanced pipelines."
 }
 
+\detail{Archiving complexity}{
+  Someone actually started on a PR for this a while back. It doesn't seem too
+  hard.
+}
+
 \title-slide{Instanced Pipelines}{
   \exodia{img/exodia-left-leg.png}
 }
@@ -124,6 +144,10 @@
 
   A build sets all instances of a pipeline - any other instances that were not
   set by the build become auto-archived. (This will be important later.)
+}
+
+\detail{Instanced Pipelines complexity}{
+  TODO
 }
 
 \title-slide{Projects}{
