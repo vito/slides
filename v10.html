@@ -21,15 +21,15 @@
   </div>
 </div><div class="slide title">
   <div class="body">
-    <h1>Spaces</h1>
+    <h1>RIP Spaces</h1>
 
-    <p>Concourse&#39;s White Whale</p>
+    <p>2017-2019</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>What is spaces? <span class="continue">(cont'd)</span></h2>
+    <h2>What was spaces? <span class="continue">(cont'd)</span></h2>
 
-    <p>Let&#39;s peel away one layer and see what &#39;spaces&#39; is about:</p><ul>
+    <p>Let&#39;s peel away one layer and see what &#39;spaces&#39; was about:</p><ul>
 
   <li><p>Dynamically running jobs across &#39;spatial&#39; change, i.e. branches and PRs.</p></li>
 
@@ -37,19 +37,19 @@
 
   <li><p>Automatically cleaning up spaces for closed PRs, etc.</p></li>
 
-</ul><p>Our initial approach was to <strong>extend</strong> jobs and resources to support run across many spaces.</p>
+</ul><p>Our initial approach was to <strong>extend</strong> jobs and resources to support running builds and detecting versions across many spaces.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Feature paralysis <span class="continue">(cont'd)</span></h2>
+    <h2>Analysis paralysis <span class="continue">(cont'd)</span></h2>
 
-    <p>This initial approach sounded simple but proved to be strategically expensive.</p><p>This whole time it&#39;s been thought of as one feature, and we baked it into the entire stack.</p><p>Having a single feature touch so many things is scary and involves a lot of second-guessing. This causes delays.</p><p>Analysis paralysis is real.</p>
+    <p>This approach proved to be strategically expensive.</p><p>We thought of it as one, and we baked it into the entire stack.</p><p>Having a single feature touch so many things is scary and involves a lot of second-guessing.</p><p>This caused delays.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>A new approach <span class="continue">(cont'd)</span></h2>
+    <h2>Learning to walk again <span class="continue">(cont'd)</span></h2>
 
-    <p>The <strong>new</strong> new resource interface is no longer coupled to &#39;spaces.&#39;</p><p>Instead, we&#39;ve made the resource concept more general. We&#39;ll focus on pipeline-level semantics and composing resources with each other instead.</p><p>Doing this really helped de-risk the roadmap; now instead of 1 big feature we had 2 independent ones.</p><p>I think I found a way to do the same for &#39;spaces&#39; itself.</p>
+    <p>Let&#39;s tackle the root of the problem: it&#39;s one big feature, spanning the entire stack.</p><p>We recently de-coupled the &#39;resources v2&#39; interface from &#39;spaces&#39; by generalizing the interface and leveraging composition instead.</p><p>Doing this was liberating: suddenly we could deliver two big features independently instead of all at once.</p><p>I think I have a plan to do the same for &#39;spaces&#39;.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -59,13 +59,19 @@
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2><code>set_pipeline</code> <span class="continue">(cont'd)</span></h2>
+    <h2><code>set_pipeline</code> step <span class="continue">(cont'd)</span></h2>
 
     <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><div class="highlight"><pre style="">plan:<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
-</span></pre></div><p>The pipeline will be set within the team running the build.</p><p>With this we can deprecate the <code>concourse-pipeline</code> resource.</p>
+</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>set_pipeline</code> complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>Not much. This could probably be done in a &#39;freedom friday&#39;.</p><p>We can then immediately deprecate the <code>concourse-pipeline</code> resource.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -84,6 +90,12 @@
 </span><span style="color:#e6e7e8">    </span>branch_name:<span style="color:#e6e7e8"> </span>concourse-branch/name<span style="color:#e6e7e8">
 </span></pre></div><p>This is the beginning of &#39;spatial resources&#39; which return a config fragment for each space.</p>
   </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code> complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>There are interesting core and UI implications here, but nothing too crazy.</p><p>We&#39;ll run a <code>check</code> to find all the versions, and generate one step tree for each - similar to the <code>retry</code> step, at least in the UI.</p><p>Later we&#39;ll want to support <code>trigger: true</code>. That&#39;ll be interesting but it seems pretty easy to reason about at least.</p>
+  </div>
 </div><div class="slide title">
   <div class="body">
     <h1>Archiving Pipelines</h1>
@@ -96,6 +108,12 @@
 
     <p>Pipelines can be archived when they are no longer needed.</p><p>When archived, a pipeline becomes completely inactive, and its name can be used for later pipelines. This is basically a soft-delete.</p><div class="highlight"><pre style="">$ fly archive-pipeline -p pipeline-name
 </pre></div><p>This is a pretty simple feature on its own, but it&#39;s also a precursor to &#34;instanced pipelines.&#34;</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Archiving complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>Someone actually started on a PR for this a while back. It doesn&#39;t seem too hard.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -111,6 +129,12 @@
 </span><span style="color:#e6e7e8"></span>instance_vars:<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">  </span>version:<span style="color:#e6e7e8"> </span><span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8">
 </span></pre></div><p>A build sets all instances of a pipeline - any other instances that were not set by the build become auto-archived. (This will be important later.)</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Instanced Pipelines complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>TODO</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -196,6 +220,20 @@ ci/tasks/test.yml
   </div>
 </div><div class="slide continue">
   <div class="body">
+    <h2>Spaces! <span class="continue">(cont'd)</span></h2>
+
+    <p>Circling back to &#39;spaces&#39;, let&#39;s see how these features add up:</p><ul>
+
+  <li><p>Dynamically running pipelines across branches and PRs: <strong>projects</strong> &#43; <strong><code>across</code> step</strong> &#43; <strong><code>set_pipeline</code> step</strong>.</p></li>
+
+  <li><p>&#34;Fanning in&#34; across spaces is possible with <strong>projects</strong>.</p></li>
+
+  <li><p>Automatically cleaning up spaces which no longer exist: <strong>instanced pipelines</strong> become automatically <strong>archived</strong>.</p></li>
+
+</ul>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
     <h2>Demo 1: simple project <span class="continue">(cont'd)</span></h2>
 
     <pre>name: booklit
@@ -252,19 +290,11 @@ plan:
 
     <p>And we all know how that turned out anyway.</p><div style="text-align: center"><p><span class="small-screen"><img src="img/yugi-exodia-head.jpg" alt="" /></span> <span class="small-screen"><img src="img/kaiba.png" alt="" /></span></p></div>
   </div>
-</div><div class="slide">
+</div><div class="slide title">
   <div class="body">
-    <h2>Spaces!</h2>
+    <h1>Outcomes</h1>
 
-    <p>Circling back to &#39;spaces&#39;, let&#39;s see how these features add up:</p><ul>
-
-  <li><p>Dynamically running pipelines across branches and PRs: <strong>projects</strong> &#43; <strong><code>across</code> step</strong> &#43; <strong><code>set_pipeline</code> step</strong>.</p></li>
-
-  <li><p>&#34;Fanning in&#34; across spaces: <strong>projects</strong> enable cross-pipeline <code>passed</code> constraints.</p></li>
-
-  <li><p>Automatically cleaning up spaces which no longer exist: <strong>instanced pipelines</strong> become automatically <strong>archived</strong>.</p></li>
-
-</ul><p>...but along the way, we&#39;ve delivered a bunch of other outcomes.</p>
+    <p>What will we have achieved?</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
