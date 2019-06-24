@@ -7,7 +7,9 @@
   \youtube{YHRyirjO5rM}
 }
 
-\title-slide{\code{set_pipeline} step}
+\title-slide{\code{set_pipeline} step}{
+  \image{img/exodia-right-arm.png}
+}
 
 \detail{\code{set_pipeline}}{
   Pipelines can be configured by using a new \code{set_pipeline} step in a
@@ -20,12 +22,66 @@
     file: ci/pipelines/concourse.yml
   }}
 
-  The goal here is to deprecate the \code{concourse-pipeline} resource, which
-  is currently plagued by two problems: configuring auth, and keeping
-  \code{fly} in sync.
+  The pipeline will be set within the team running the build.
+
+  With this we can deprecate the \code{concourse-pipeline} resource.
 }
 
-\title-slide{Introducing "Projects"}
+\title-slide{\code{across} step}{
+  \image{img/exodia-left-arm.png}
+}
+
+\detail{\code{across} step}{
+  An \code{across} step runs a given step across all versions of a resource:
+
+  \codeblock{yml}{{
+  across: concourse-branch
+  do:
+  - set_pipeline: branch
+    var_files:
+      branch_name: concourse-branch/name
+  }}
+}
+
+\title-slide{Archiving Pipelines}{
+  \image{img/exodia-right-leg.png}
+}
+
+\detail{Archiving Pipelines}{
+  Pipelines can be archived when they are no longer needed.
+
+  When archived, a pipeline becomes completely inactive, and its name can be
+  used for later pipelines. This is basically a soft-delete.
+
+  \codeblock{sh}{{
+  $ fly archive-pipeline -p pipeline-name
+  }}
+
+  This is a pretty simple feature on its own, but it's also a precursor to
+  "instanced pipelines."
+}
+
+\title-slide{Instanced Pipelines}{
+  \image{img/exodia-left-leg.png}
+}
+
+\detail{Instanced Pipelines}{
+  Pipeline templates can be "instantiated" with vars that become part of the
+  pipeline's identifier.
+
+  \codeblock{yml}{{
+  set_pipeline: release
+  instance_vars:
+    version: 5.3
+  }}
+
+  A build sets all instances of a pipeline - any other instances that were not
+  set by the build become auto-archived. (This will be important later.)
+}
+
+\title-slide{Projects}{
+  \image{img/exodia-head.png}
+}
 
 \detail{\code{fly set-project}}{
   A project is a resource containing config for tasks, resources, pipelines,
@@ -70,8 +126,10 @@
   }}
 
   The project's \code{plan:} will run every time a new version of the project
-  is found, and will have the project resource itself available under the
-  project's name.
+  is found. The build output will be visible in the UI.
+
+  The project's code will available to each build executed in the project under
+  the project's name.
 }
 
 \detail{Smoother learning curve}{
@@ -147,10 +205,120 @@
   }
 }
 
-\title-slide{Archiving Pipelines}
+\title-slide{Putting it all together...}{
+  \image{img/exodia-together.jpg}
+}
 
-\title-slide{\code{across} step}
+\detail{Demo 1: simple project}{
+  \code{{
+  name: booklit
+  plan:
+  - task: test
+  }}
 
-\title-slide{Instanced Pipelines}
+  \codeblock{sh}{{
+  fly set-project -p booklit -t git \\
+    -s uri=https://github.com/vito/booklit
+  }}
 
-\title-slide{Spaces!}
+  This should feel intuitive for smaller projects which may not need a
+  sophisticated pipeline system. Concourse has been described as 'overkill' for
+  such use cases - hopefully this bridges the gap.
+}
+
+\detail{Demo 2: git ops project}{
+  \code{{
+  name: ci
+  var_sources:
+  - type: vault
+    config: # ...
+  plan:
+  - \bold{set_pipeline}: concourse
+  - \bold{set_pipeline}: prs
+  }}
+
+  Though in this case it might make more sense for \code{prs} to be a separate
+  project so it doesn't share the credential manager config. (Or maybe we could
+  have pipelines associated to credential managers?)
+}
+
+\detail{Demo 3: spatial pipelines}{
+  \code{{
+  \bold{name}: ci
+  \bold{plan}:
+  - \bold{set_pipeline}: concourse
+  - \bold{across}: branch
+    resource: release-branches
+    do:
+      \bold{set_pipeline}: release
+      \bold{instance_fragment}: branch
+  - \bold{across}: branch
+    resource: feature-branches
+    do:
+      \bold{set_pipeline}: branch
+      \bold{instance_fragment}: branch
+  }}
+}
+
+\detail{Outcomes}{
+  \list{
+    De-risked roadmap: composes 5 smaller features instead of implementing 1
+    big one (spaces).
+  }{
+    A familiar workflow for small projects, with a more gradual learning curve.
+  }{
+    A reproducible "\code{git} ops" workflow especially valuable for large
+    projects.
+  }{
+    A pattern for automatically reconfiguring pipelines within a project.
+  }{
+    A simple and consistent structure for project repositories, allowing
+    pipeline configs to shrink.
+  }{
+    Pipelines feel like more complete, instead of just being the outermost
+    shell with no meaning or automation of its own.
+  }{
+    Replacement of the \code{concourse-pipeline} resource.
+  }{
+    Build matrixes are possible with the \code{across} step and intuitively
+    extend to pipeline matrixes with the \code{set_pipeline} step.
+  }{
+    Pipeline "instances" likely removes the need for hierarchical pipelines,
+    while being more intuitive and useful in general
+  }
+}
+
+\detail{When do we start?}{
+  \italic{Today.}
+}
+
+{-
+  This roadmap is based on 5 features which can be implemented in any order and
+  delivered one by one.
+
+  So instead of working on "spaces" for a year, we can 
+}
+
+  \list{
+    A roadmap based on 5 independently valuable features, able to be
+    implemented in any order and delivered one by one.
+  }{
+    All of the goals of "spaces", by composing smaller, simpler ideas.
+  }{
+    A more gradual learning curve for new Concourse users.
+  }{
+    A simpler usage pattern suitable for small-scale projects.
+  }{
+    Git Ops, for larger projects.
+  }
+
+  set_pipeline: opens the floodgates for pipeline automation
+
+  projects: passed constraints across pipelines instances
+
+  archiving + instances: allows pipelines for deleted branches and merged PRs
+  to automatically go away
+
+  across: allows auto-configuring pipelines for PRs and branches
+}
+-}
