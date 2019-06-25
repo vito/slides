@@ -265,6 +265,27 @@ plan:
   </div>
 </div><div class="slide continue">
   <div class="body">
+    <h2>Simpler build plans <span class="continue">(cont'd)</span></h2>
+
+    <div class="side-by-side">
+  
+  <div class="side-by-side-cell"><p>Before:</p><pre>in_parallel:
+- task: fly-linux
+  file: ci/tasks/fly-linux.yml
+- task: fly-darwin
+  file: ci/tasks/fly-darwin.yml
+- task: fly-windows
+  file: ci/tasks/fly-windows.yml</pre></div>
+  
+  <div class="side-by-side-cell"><p>After:</p><pre>in_parallel:
+- task: fly-linux
+- task: fly-darwin
+- task: fly-windows</pre></div>
+  
+</div><p>This reads a lot better, builds on existing usage patterns, and task names are actually useful now!</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
     <h2>Project-level creds <span class="continue">(cont'd)</span></h2>
 
     <p>Projects define credential managers as <code>var_sources</code>:</p><pre>name: ci
@@ -273,7 +294,7 @@ plan:
 - type: vault
   config: # ...
 
-plan: # ...</pre><p>The proximity to <code>plan:</code> makes it easy to audit credential access within the project.</p>
+plan: # ...</pre><p>The proximity to <code>plan:</code> makes it easy to visibly audit credential access within the project.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -380,7 +401,7 @@ plan:
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Fan-in across pipelines <span class="continue">(cont'd)</span></h2>
+    <h2>Inter-dependent pipelines <span class="continue">(cont'd)</span></h2>
 
     <p><strong>Projects</strong> allow pipelines to reference each other in <code>passed</code> constraints.</p><p>This way users can configure independent pipelines for &#39;matrix&#39; style workflows, i.e. testing across IaaSes.</p>
   </div>
@@ -398,7 +419,7 @@ plan:
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Pipeline sub-naming <span class="continue">(cont'd)</span></h2>
+    <h2>Pipeline hierarchies <span class="continue">(cont'd)</span></h2>
 
     <p><strong>Pipeline instances</strong> allow for a common pipeline template to use some of its <code>((vars))</code> as part of the pipeline identifier.</p><p>This removes a lot of the need for &#39;hierarchical pipelines&#39;, which has been trotted around as an idea for a long time.</p><p>Pipeline instances should feel less complicated than arbitrary hierarchies (depth 2 is simpler than depth N).</p>
   </div>
