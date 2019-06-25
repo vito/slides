@@ -9,10 +9,12 @@
 
 \title-slide{RIP Spaces}{
   2017-2019
+
+  we hardly knew ye
 }
 
 \detail{What was spaces?}{
-  Let's peel away one layer and see what 'spaces' was about:
+  Behind the name, there are a few great features:
 
   \list{
     Dynamically running jobs across 'spatial' change, i.e. branches and PRs.
@@ -21,88 +23,42 @@
   }{
     Automatically cleaning up spaces for closed PRs, etc.
   }
-
-  Our initial approach was to \bold{extend} jobs and resources to support
-  running builds and detecting versions across many spaces.
 }
 
 \detail{Analysis paralysis}{
+  Our first approach was to \bold{extend} resources and jobs to support
+  finding versions and running builds across spaces.
+
   This approach proved to be strategically expensive.
 
-  We thought of it as one, and we baked it into the entire stack.
+  We thought of it as one big feature, and we baked it into the entire stack,
+  from the web UI down to the resource protocol.
 
-  Having a single feature touch so many things is scary and involves a lot of
-  second-guessing.
-
-  This caused delays.
+  Having a single feature touch so many things led to lot of second-guessing
+  and many different iterations.
 }
 
 \detail{Learning to walk again}{
-  Let's tackle the root of the problem: it's one big feature, spanning the
-  entire stack.
+  Can we break this big feature up?
 
-  We recently de-coupled the 'resources v2' interface from 'spaces' by
-  generalizing the interface and leveraging composition instead.
+  Recently we were able to decouple 'Resources v2' from 'Spaces' by taking a
+  completely different approach, leveraging composition instead of directly
+  coupling them.
 
   Doing this was liberating: suddenly we could deliver two big features
   independently instead of all at once.
 
-  I think I have a plan to do the same for 'spaces'.
+  Can we do the same for 'spaces'?
 }
 
-\title-slide{\code{set_pipeline} step}{
-  \exodia{img/exodia-right-arm.png}
-}
+\detail{Hold my hand...}{
+  Let's go on a journey.
 
-\detail{\code{set_pipeline} step}{
-  Pipelines can be configured by using a new \code{set_pipeline} step in a
-  build plan:
+  I've got a few features to propose, which I hope are independently useful.
 
-  \codeblock{yaml}{{
-  plan:
-  - get: ci
-  - set_pipeline: concourse
-    file: ci/pipelines/concourse.yml
-  }}
+  When they're used together, they become way more powerful.
 
-  The pipeline will be set within the team running the build, and will start
-  un-paused.
-}
-
-\detail{\code{set_pipeline} complexity}{
-  Not much. This could probably be done in a 'freedom friday'.
-
-  We can then immediately deprecate the \code{concourse-pipeline} resource.
-}
-
-\title-slide{\code{across} step}{
-  \exodia{img/exodia-left-arm.png}
-}
-
-\detail{\code{across} step}{
-  An \code{across} step runs a given step across all config fragments (i.e.
-  versions) returned by a resource \code{check}:
-
-  \codeblock{yml}{{
-  across: concourse-branch
-  do:
-  - set_pipeline: branch
-    var_files:
-      branch_name: concourse-branch/name
-  }}
-
-  This is the beginning of 'spatial resources' which return a config fragment
-  for each space.
-}
-
-\detail{\code{across} complexity}{
-  There are interesting core and UI implications here, but nothing too crazy.
-
-  We'll run a \code{check} to find all the versions, and generate one step tree
-  for each - similar to the \code{retry} step, at least in the UI.
-
-  Later we'll want to support \code{trigger: true}. That'll be interesting but
-  it seems pretty easy to reason about at least.
+  Hang in there - the dots should connect as we go along!
 }
 
 \title-slide{Archiving Pipelines}{
@@ -123,9 +79,18 @@
   "instanced pipelines."
 }
 
-\detail{Archiving complexity}{
+\detail{Archiving implications}{
+  Estimate: medium
+
   Someone actually started on a PR for this a while back. It doesn't seem too
   hard.
+
+  \bold{API}: support archiving/unarchiving, support re-using names of archived
+  pipelines.
+
+  \bold{UX}: 'dim' and/or stash away archived pipelines.
+
+  \bold{Core}: don't schedule archived pipelines.
 }
 
 \title-slide{Instanced Pipelines}{
@@ -147,44 +112,136 @@
 }
 
 \detail{Instanced Pipelines complexity}{
-  TODO
+  Estimate: medium/large
+
+  \bold{API}: allow multiple instances of same pipeline name with different
+  vars.
+
+  \bold{Core}: schedule all pipeline instances.
+
+  \bold{UX}: support navigating to instances of a pipeline. (A bit of an
+  understatemt.)
+}
+
+\title-slide{\code{set_pipeline} step}{
+  \exodia{img/exodia-right-arm.png}
+}
+
+\detail{\code{set_pipeline} step}{
+  Pipelines can be configured by using a new \code{set_pipeline} step in a
+  build plan:
+
+  \codeblock{yaml}{{
+  plan:
+  - get: ci
+  - set_pipeline: concourse
+    file: ci/pipelines/concourse.yml
+  }}
+
+  The pipeline will be set within the team running the build, and will start
+  un-paused.
+
+  We can then immediately deprecate the \code{concourse-pipeline} resource.
+}
+
+\detail{\code{set_pipeline} complexity}{
+  Estimate: small
+
+  \bold{API}: support it as part of the build plan.
+
+  \bold{Core}: implement the step - shouldn't take too long.
+
+  \bold{UX}: support rendering the step.
+}
+
+\title-slide{\code{across} step}{
+  \exodia{img/exodia-left-arm.png}
+}
+
+\detail{\code{across} step}{
+  An \code{across} step runs a given step across all versions returned by a
+  resource \code{check}:
+
+  \code{{
+  \bold{across}: supported-ruby-images
+  \bold{as}: ruby
+  do:
+  - task: unit
+    image: ruby
+    file: ci/tasks/unit.yml
+  }}
+
+  This is the beginning of 'spatial resources' which return a config fragment
+  for each space.
+}
+
+\detail{\code{across} with \code{trigger}}{
+  The next step is to support \code{trigger: true} - this way the build will
+  fire on \italic{any} change to the set, i.e. fragments appearing or
+  disappearing:
+
+  \code{{
+  across: concourse-branches
+  as: branch
+  \bold{trigger: true}
+  do:
+  - set_pipeline: branch
+    instance_fragment: branch
+    file: ci/pipelines/branch.yml
+  }}
+}
+
+\detail{\code{across} complexity}{
+  Estimate: medium/large
+
+  \bold{API}: support it as part of the build plan.
+
+  \bold{Core}: implement a new type of scheduling and triggering, similar to
+  \code{get} step handling but for \italic{sets} of versions. Construct a build
+  plan that repeats the step with a \code{get} for each version.
+
+  \bold{UX}: show all the steps, probably in some sort of tab UI. There's some
+  prior art with \code{attempts:}.
 }
 
 \title-slide{Projects}{
   \exodia{img/exodia-head.png}
 }
 
-\detail{\code{fly set-project}}{
-  A project is a resource containing config for tasks, resources, pipelines,
-  and the project itself.
+\detail{What is a project?}{
+  A project is a namespace for pipelines, resources, and tasks.
 
-  Projects are configured with \code{fly set-project}:
-
-  \codeblock{sh}{{
-    fly -t ci set-project \\
-      --name booklit \\
-      --type git \\
-      --source uri=https://github.com/vito/booklit \\
-      --path ci
-  }}
+  A project is bootstrapped by a resource containing the project's
+  configuration, along with its tasks, resources, and pipelines.
 
   Many projects may exist within a team.
 }
 
-\detail{Project structure}{
-  Concourse will \code{check} for new versions of the project and load its
-  config from a \code{project.yml} file.
+\detail{\code{fly set-project}}{
+  Projects are configured with \code{fly set-project}:
 
-  It will then load up all tasks, resources, and pipelines defined within the
-  project directory structure:
+  \codeblock{sh}{{
+    fly -t ci set-project \\
+      --project booklit \\
+      --type git \\
+      --source uri=https://github.com/vito/booklit \\
+      --path ci
+  }}
+}
+
+\detail{Project structure}{
+  Concourse will \code{check} for new versions of the project and load the
+  project's config, resources, tasks, etc.:
 
   \codeblock{sh}{{
   ci/project.yml
   ci/tasks/test.yml
+  ci/resources/booklit.yml
+  ci/pipelines/booklit.yml
   }}
 
-  This allows pipelines to shrink down to just job definitions, removing
-  hundreds of lines of YAML.
+  Pipelines shrink down to just job definitions, removing hundreds of lines of
+  YAML. Separate files are much easier to work with.
 }
 
 \detail{It's just a build plan!}{
@@ -197,10 +254,10 @@
   }}
 
   The project's \code{plan:} will run every time a new version of the project
-  is found. The build output will be visible in the UI.
+  is found, with the project resource itself available under the configured
+  name.
 
-  The project's code will available to each build executed in the project under
-  the project's name.
+  Kinda like Travis/Circle CI.
 }
 
 \detail{Git Ops}{
@@ -256,7 +313,7 @@
   \exodia{img/exodia-together.jpg}
 }
 
-\detail{Spaces!}{
+\detail{Spaces?}{
   Circling back to 'spaces', let's see how these features add up:
 
   \list{
@@ -424,16 +481,16 @@
 
 \slide{References}{
   \list{
-    \link{#1707}{https://github.com/concourse/concourse/issues/1707} Spatial resource flows
+    \link{#523}{https://github.com/concourse/concourse/issues/523} Hierarchical pipelines
   }{
     \link{#1200}{https://github.com/concourse/concourse/issues/1200} How do you use \code{fly set-pipeline}?
   }{
-    \link{#523}{https://github.com/concourse/concourse/issues/523} Hierarchical pipelines
+    \link{#1707}{https://github.com/concourse/concourse/issues/1707} Spatial resource flows
   }{
     \link{#1994}{https://github.com/concourse/concourse/issues/1994} Split pipelines up; simple templating
   }{
     \link{#3985}{https://github.com/concourse/concourse/issues/3985} Stricter naming conventions
   }{
-    \link{RFC #21}{https://github.com/concourse/rfcs/pull/21} \strike{Team}Project credential managers
+    \link{RFC #21}{https://github.com/concourse/rfcs/pull/21} \strike{Team} Project credential managers
   }
 }
