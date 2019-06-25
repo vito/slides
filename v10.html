@@ -23,13 +23,13 @@
   <div class="body">
     <h1>RIP Spaces</h1>
 
-    <p>2017-2019</p>
+    <p>2017-2019</p><p>we hardly knew ye</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2>What was spaces? <span class="continue">(cont'd)</span></h2>
 
-    <p>Let&#39;s peel away one layer and see what &#39;spaces&#39; was about:</p><ul>
+    <p>Behind the name, there are a few great features:</p><ul>
 
   <li><p>Dynamically running jobs across &#39;spatial&#39; change, i.e. branches and PRs.</p></li>
 
@@ -37,64 +37,25 @@
 
   <li><p>Automatically cleaning up spaces for closed PRs, etc.</p></li>
 
-</ul><p>Our initial approach was to <strong>extend</strong> jobs and resources to support running builds and detecting versions across many spaces.</p>
+</ul>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2>Analysis paralysis <span class="continue">(cont'd)</span></h2>
 
-    <p>This approach proved to be strategically expensive.</p><p>We thought of it as one, and we baked it into the entire stack.</p><p>Having a single feature touch so many things is scary and involves a lot of second-guessing.</p><p>This caused delays.</p>
+    <p>Our first approach was to <strong>extend</strong> resources and jobs to support finding versions and running builds across spaces.</p><p>This approach proved to be strategically expensive.</p><p>We thought of it as one big feature, and we baked it into the entire stack, from the web UI down to the resource protocol.</p><p>Having a single feature touch so many things led to lot of second-guessing and many different iterations.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2>Learning to walk again <span class="continue">(cont'd)</span></h2>
 
-    <p>Let&#39;s tackle the root of the problem: it&#39;s one big feature, spanning the entire stack.</p><p>We recently de-coupled the &#39;resources v2&#39; interface from &#39;spaces&#39; by generalizing the interface and leveraging composition instead.</p><p>Doing this was liberating: suddenly we could deliver two big features independently instead of all at once.</p><p>I think I have a plan to do the same for &#39;spaces&#39;.</p>
-  </div>
-</div><div class="slide title">
-  <div class="body">
-    <h1><code>set_pipeline</code> step</h1>
-
-    <p><img src="img/exodia-right-arm.png" alt="" /></p>
+    <p>Can we break this big feature up?</p><p>Recently we were able to decouple &#39;Resources v2&#39; from &#39;Spaces&#39; by taking a completely different approach, leveraging composition instead of directly coupling them.</p><p>Doing this was liberating: suddenly we could deliver two big features independently instead of all at once.</p><p>Can we do the same for &#39;spaces&#39;?</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2><code>set_pipeline</code> step <span class="continue">(cont'd)</span></h2>
+    <h2>Hold my hand... <span class="continue">(cont'd)</span></h2>
 
-    <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><div class="highlight"><pre style="">plan:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
-</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p>
-  </div>
-</div><div class="slide continue">
-  <div class="body">
-    <h2><code>set_pipeline</code> complexity <span class="continue">(cont'd)</span></h2>
-
-    <p>Not much. This could probably be done in a &#39;freedom friday&#39;.</p><p>We can then immediately deprecate the <code>concourse-pipeline</code> resource.</p>
-  </div>
-</div><div class="slide title">
-  <div class="body">
-    <h1><code>across</code> step</h1>
-
-    <p><img src="img/exodia-left-arm.png" alt="" /></p>
-  </div>
-</div><div class="slide continue">
-  <div class="body">
-    <h2><code>across</code> step <span class="continue">(cont'd)</span></h2>
-
-    <p>An <code>across</code> step runs a given step across all config fragments (i.e. versions) returned by a resource <code>check</code>:</p><div class="highlight"><pre style="">across:<span style="color:#e6e7e8"> </span>concourse-branch<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>do:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>branch<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>var_files:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">    </span>branch_name:<span style="color:#e6e7e8"> </span>concourse-branch/name<span style="color:#e6e7e8">
-</span></pre></div><p>This is the beginning of &#39;spatial resources&#39; which return a config fragment for each space.</p>
-  </div>
-</div><div class="slide continue">
-  <div class="body">
-    <h2><code>across</code> complexity <span class="continue">(cont'd)</span></h2>
-
-    <p>There are interesting core and UI implications here, but nothing too crazy.</p><p>We&#39;ll run a <code>check</code> to find all the versions, and generate one step tree for each - similar to the <code>retry</code> step, at least in the UI.</p><p>Later we&#39;ll want to support <code>trigger: true</code>. That&#39;ll be interesting but it seems pretty easy to reason about at least.</p>
+    <p>Let&#39;s go on a journey.</p><p>I&#39;ve got a few features to propose, which I hope are independently useful.</p><p>When they&#39;re used together, they become way more powerful.</p><p>Hang in there - the dots should connect as we go along!</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -111,9 +72,9 @@
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Archiving complexity <span class="continue">(cont'd)</span></h2>
+    <h2>Archiving implications <span class="continue">(cont'd)</span></h2>
 
-    <p>Someone actually started on a PR for this a while back. It doesn&#39;t seem too hard.</p>
+    <p>Estimate: medium</p><p>Someone actually started on a PR for this a while back. It doesn&#39;t seem too hard.</p><p><strong>API</strong>: support archiving/unarchiving, support re-using names of archived pipelines.</p><p><strong>UX</strong>: &#39;dim&#39; and/or stash away archived pipelines.</p><p><strong>Core</strong>: don&#39;t schedule archived pipelines.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -134,7 +95,64 @@
   <div class="body">
     <h2>Instanced Pipelines complexity <span class="continue">(cont'd)</span></h2>
 
-    <p>TODO</p>
+    <p>Estimate: medium/large</p><p><strong>API</strong>: allow multiple instances of same pipeline name with different vars.</p><p><strong>Core</strong>: schedule all pipeline instances.</p><p><strong>UX</strong>: support navigating to instances of a pipeline. (A bit of an understatemt.)</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1><code>set_pipeline</code> step</h1>
+
+    <p><img src="img/exodia-right-arm.png" alt="" /></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>set_pipeline</code> step <span class="continue">(cont'd)</span></h2>
+
+    <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><div class="highlight"><pre style="">plan:<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
+</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p><p>We can then immediately deprecate the <code>concourse-pipeline</code> resource.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>set_pipeline</code> complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>Estimate: small</p><p><strong>API</strong>: support it as part of the build plan.</p><p><strong>Core</strong>: implement the step - shouldn&#39;t take too long.</p><p><strong>UX</strong>: support rendering the step.</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
+    <h1><code>across</code> step</h1>
+
+    <p><img src="img/exodia-left-arm.png" alt="" /></p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code> step <span class="continue">(cont'd)</span></h2>
+
+    <p>An <code>across</code> step runs a given step across all versions returned by a resource <code>check</code>:</p><pre><strong>across</strong>: supported-ruby-images
+<strong>as</strong>: ruby
+do:
+- task: unit
+  image: ruby
+  file: ci/tasks/unit.yml</pre><p>This is the beginning of &#39;spatial resources&#39; which return a config fragment for each space.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code> with <code>trigger</code> <span class="continue">(cont'd)</span></h2>
+
+    <p>The next step is to support <code>trigger: true</code> - this way the build will fire on <em>any</em> change to the set, i.e. fragments appearing or disappearing:</p><pre>across: concourse-branches
+as: branch
+<strong>trigger: true</strong>
+do:
+- set_pipeline: branch
+  instance_fragment: branch
+  file: ci/pipelines/branch.yml</pre>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code> complexity <span class="continue">(cont'd)</span></h2>
+
+    <p>Estimate: medium/large</p><p><strong>API</strong>: support it as part of the build plan.</p><p><strong>Core</strong>: implement a new type of scheduling and triggering, similar to <code>get</code> step handling but for <em>sets</em> of versions. Construct a build plan that repeats the step with a <code>get</code> for each version.</p><p><strong>UX</strong>: show all the steps, probably in some sort of tab UI. There&#39;s some prior art with <code>attempts:</code>.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -144,22 +162,30 @@
   </div>
 </div><div class="slide continue">
   <div class="body">
+    <h2>What is a project? <span class="continue">(cont'd)</span></h2>
+
+    <p>A project is a namespace for pipelines, resources, and tasks.</p><p>A project is bootstrapped by a resource containing the project&#39;s configuration, along with its tasks, resources, and pipelines.</p><p>Many projects may exist within a team.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
     <h2><code>fly set-project</code> <span class="continue">(cont'd)</span></h2>
 
-    <p>A project is a resource containing config for tasks, resources, pipelines, and the project itself.</p><p>Projects are configured with <code>fly set-project</code>:</p><div class="highlight"><pre style="">fly -t ci set-project <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  --name booklit <span style="color:#3498db">\
+    <p>Projects are configured with <code>fly set-project</code>:</p><div class="highlight"><pre style="">fly -t ci set-project <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  --project booklit <span style="color:#3498db">\
 </span><span style="color:#3498db"></span>  --type git <span style="color:#3498db">\
 </span><span style="color:#3498db"></span>  --source <span style="color:#3498db">uri</span>=https://github.com/vito/booklit <span style="color:#3498db">\
 </span><span style="color:#3498db"></span>  --path ci
-</pre></div><p>Many projects may exist within a team.</p>
+</pre></div>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2>Project structure <span class="continue">(cont'd)</span></h2>
 
-    <p>Concourse will <code>check</code> for new versions of the project and load its config from a <code>project.yml</code> file.</p><p>It will then load up all tasks, resources, and pipelines defined within the project directory structure:</p><div class="highlight"><pre style="">ci/project.yml
+    <p>Concourse will <code>check</code> for new versions of the project and load the project&#39;s config, resources, tasks, etc.:</p><div class="highlight"><pre style="">ci/project.yml
 ci/tasks/test.yml
-</pre></div><p>This allows pipelines to shrink down to just job definitions, removing hundreds of lines of YAML.</p>
+ci/resources/booklit.yml
+ci/pipelines/booklit.yml
+</pre></div><p>Pipelines shrink down to just job definitions, removing hundreds of lines of YAML. Separate files are much easier to work with.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -168,7 +194,7 @@ ci/tasks/test.yml
     <p>A minimal project configuration contains a <code>name</code> and a <code>plan</code>:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>booklit<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>task:<span style="color:#e6e7e8"> </span>test<span style="color:#e6e7e8">
-</span></pre></div><p>The project&#39;s <code>plan:</code> will run every time a new version of the project is found. The build output will be visible in the UI.</p><p>The project&#39;s code will available to each build executed in the project under the project&#39;s name.</p>
+</span></pre></div><p>The project&#39;s <code>plan:</code> will run every time a new version of the project is found, with the project resource itself available under the configured name.</p><p>Kinda like Travis/Circle CI.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -220,7 +246,7 @@ ci/tasks/test.yml
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Spaces! <span class="continue">(cont'd)</span></h2>
+    <h2>Spaces? <span class="continue">(cont'd)</span></h2>
 
     <p>Circling back to &#39;spaces&#39;, let&#39;s see how these features add up:</p><ul>
 
@@ -344,17 +370,17 @@ plan:
 
     <ul>
 
-  <li><p><a href="https://github.com/concourse/concourse/issues/1707">#1707</a> Spatial resource flows</p></li>
+  <li><p><a href="https://github.com/concourse/concourse/issues/523">#523</a> Hierarchical pipelines</p></li>
 
   <li><p><a href="https://github.com/concourse/concourse/issues/1200">#1200</a> How do you use <code>fly set-pipeline</code>?</p></li>
 
-  <li><p><a href="https://github.com/concourse/concourse/issues/523">#523</a> Hierarchical pipelines</p></li>
+  <li><p><a href="https://github.com/concourse/concourse/issues/1707">#1707</a> Spatial resource flows</p></li>
 
   <li><p><a href="https://github.com/concourse/concourse/issues/1994">#1994</a> Split pipelines up; simple templating</p></li>
 
   <li><p><a href="https://github.com/concourse/concourse/issues/3985">#3985</a> Stricter naming conventions</p></li>
 
-  <li><p><a href="https://github.com/concourse/rfcs/pull/21">RFC #21</a> <span style="text-decoration: line-through">Team</span>Project credential managers</p></li>
+  <li><p><a href="https://github.com/concourse/rfcs/pull/21">RFC #21</a> <span style="text-decoration: line-through">Team</span> Project credential managers</p></li>
 
 </ul>
   </div>
