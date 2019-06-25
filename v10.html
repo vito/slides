@@ -73,7 +73,7 @@
   <div class="body">
     <h1>Archiving Pipelines</h1>
 
-    <p><img src="img/exodia-right-leg.png" alt="" /></p>
+    <p><img src="img/exodia-right-arm.png" alt="" /></p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -92,15 +92,15 @@
   <div class="body">
     <h1>Instanced Pipelines</h1>
 
-    <p><img src="img/exodia-left-leg.png" alt="" /></p>
+    <p><img src="img/exodia-left-arm.png" alt="" /></p>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2>Instanced Pipelines <span class="continue">(cont'd)</span></h2>
 
-    <p>Pipeline templates can be &#34;instantiated&#34; with <code>((vars))</code> that also become part of the pipeline&#39;s identifier.</p><div class="highlight"><pre style="">fly<span style="color:#e6e7e8"> </span>set-pipeline<span style="color:#e6e7e8"> </span>-p<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>-i<span style="color:#e6e7e8"> </span>version:<span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>-c<span style="color:#e6e7e8"> </span>ci/pipelines/release.yml<span style="color:#e6e7e8">
+    <p>Pipeline templates can be &#34;instantiated&#34; with <code>((vars))</code> that also become part of the pipeline&#39;s identifier.</p><div class="highlight"><pre style="">$<span style="color:#e6e7e8"> </span>fly<span style="color:#e6e7e8"> </span>set-pipeline<span style="color:#e6e7e8"> </span>-p<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">    </span>-i<span style="color:#e6e7e8"> </span>version:<span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">    </span>-c<span style="color:#e6e7e8"> </span>ci/pipelines/release.yml<span style="color:#e6e7e8">
 </span></pre></div><p>This is a small UX change that allows simple pipeline hierarchies to form - 2 levels deep instead of N.</p>
   </div>
 </div><div class="slide continue">
@@ -113,17 +113,16 @@
   <div class="body">
     <h1><code>set_pipeline</code> step</h1>
 
-    <p><img src="img/exodia-right-arm.png" alt="" /></p>
+    <p><img src="img/exodia-right-leg.png" alt="" /></p>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2><code>set_pipeline</code> step <span class="continue">(cont'd)</span></h2>
 
-    <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><div class="highlight"><pre style="">plan:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
-</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p>
+    <p>Pipelines can be configured by using a new <code>set_pipeline</code> step in a build plan:</p><pre>plan:
+- get: ci
+- <strong>set_pipeline: concourse</strong>
+  file: ci/pipelines/concourse.yml</pre><p>The pipeline will be set within the team running the build, and will start un-paused.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -135,10 +134,10 @@
   file: ci/pipelines/concourse.yml
 - set_pipeline: release
   file: ci/pipelines/release.yml
-  <strong>instance_vars</strong>: {version: 5.3}
+  <strong>instance_vars: {version: 5.3}</strong>
 - set_pipeline: release
   file: ci/pipelines/release.yml
-  <strong>instance_vars</strong>: {version: 5.2}</pre>
+  <strong>instance_vars: {version: 5.2}</strong></pre>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -156,7 +155,7 @@
   <div class="body">
     <h1><code>across</code> step</h1>
 
-    <p><img src="img/exodia-left-arm.png" alt="" /></p>
+    <p><img src="img/exodia-left-leg.png" alt="" /></p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -214,12 +213,12 @@ do:
   <div class="body">
     <h2><code>fly set-project</code> <span class="continue">(cont'd)</span></h2>
 
-    <p>Projects are configured with <code>fly set-project</code>:</p><div class="highlight"><pre style="">fly -t ci set-project <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  --project booklit <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  --type git <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  --source <span style="color:#3498db">uri</span>=https://github.com/vito/booklit <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  --path ci
-</pre></div>
+    <p>Projects are configured with <code>fly set-project</code>:</p><div class="highlight"><pre style="">$ fly -t ci set-project <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>    --project booklit <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>    --type git <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>    --source <span style="color:#3498db">uri</span>=https://github.com/vito/booklit <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>    --config-path ci
+</pre></div><p>The <code>--config-path</code> flag identifies the sub-directory within the resource from which to load the project config.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -244,12 +243,11 @@ ci/pipelines/booklit.yml
   <div class="body">
     <h2>Git Ops <span class="continue">(cont'd)</span></h2>
 
-    <p>Projects, when combined with the <code>set_pipeline</code> step, allow your entire project to be automated and reproducible, even in the face of pipeline templating:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>task:<span style="color:#e6e7e8"> </span>generate-template<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>fancy-templated-pipeline<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>generated-pipeline/foo.yml<span style="color:#e6e7e8">
-</span></pre></div>
+    <p>Projects, when combined with the <code>set_pipeline</code> step, allow your entire project to be automated and reproducible.</p><p>It&#39;s a full blown build plan, you can even do pipeline templating if necessary:</p><pre>name: ci
+plan:
+- <strong>task: generate-template</strong>
+- set_pipeline: fancy-templated-pipeline
+  file: generated-pipeline/foo.yml</pre>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -269,14 +267,13 @@ ci/pipelines/booklit.yml
   <div class="body">
     <h2>Project-level creds <span class="continue">(cont'd)</span></h2>
 
-    <p>Projects define credential managers as <code>var_sources</code>:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>var_sources:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>type:<span style="color:#e6e7e8"> </span>vault<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>config:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
-</span></pre></div><p>The proximity to <code>plan:</code> makes it easy to audit credential access within the project.</p>
+    <p>Projects define credential managers as <code>var_sources</code>:</p><pre>name: ci
+
+<strong>var_sources</strong>:
+- type: vault
+  config: # ...
+
+plan: # ...</pre><p>The proximity to <code>plan:</code> makes it easy to audit credential access within the project.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -311,7 +308,8 @@ ci/pipelines/booklit.yml
     <pre>name: booklit
 plan:
 - task: test</pre><div class="highlight"><pre style="">fly set-project -p booklit -t git <span style="color:#3498db">\
-</span><span style="color:#3498db"></span>  -s <span style="color:#3498db">uri</span>=https://github.com/vito/booklit
+</span><span style="color:#3498db"></span>  -s <span style="color:#3498db">uri</span>=https://github.com/vito/booklit <span style="color:#3498db">\
+</span><span style="color:#3498db"></span>  -c ci
 </pre></div><p>This should feel intuitive for smaller projects which may not need a sophisticated pipeline system. Concourse has been described as &#39;overkill&#39; for such use cases - hopefully this bridges the gap.</p>
   </div>
 </div><div class="slide continue">
@@ -324,7 +322,7 @@ var_sources:
   config: # ...
 plan:
 - <strong>set_pipeline</strong>: concourse
-- <strong>set_pipeline</strong>: prs</pre><p>Though in this case it might make more sense for <code>prs</code> to be a separate project so it doesn&#39;t share the credential manager config. (Or maybe we could have pipelines associated to credential managers?)</p>
+- <strong>set_pipeline</strong>: prs</pre><p>In this case it might make more sense for <code>prs</code> to be a separate project so it doesn&#39;t share the credential manager config.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -333,15 +331,15 @@ plan:
     <pre><strong>name</strong>: ci
 <strong>plan</strong>:
 - <strong>set_pipeline</strong>: concourse
-- <strong>across</strong>: branch
-  resource: release-branches
+- <strong>across</strong>: release-branches
+  as: branch
   do:
-    <strong>set_pipeline</strong>: release
+  - <strong>set_pipeline</strong>: release
     <strong>instance_fragment</strong>: branch
-- <strong>across</strong>: branch
-  resource: feature-branches
+- <strong>across</strong>: feature-branches
+  as: branch
   do:
-    <strong>set_pipeline</strong>: branch
+  - <strong>set_pipeline</strong>: branch
     <strong>instance_fragment</strong>: branch</pre>
   </div>
 </div><div class="slide title">
