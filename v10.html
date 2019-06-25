@@ -21,6 +21,18 @@
   </div>
 </div><div class="slide title">
   <div class="body">
+    <h1>Resources v2</h1>
+
+    <p>an abridged update</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Resources v2 <span class="continue">(cont'd)</span></h2>
+
+    <p>Resources v2 is now an idea of a &#39;generalized resource interface&#39;, decoupled from artifact versioning.</p><p>Users will be able to use v1 and v2 resources side-by-side, and users won&#39;t even have to upgrade to v2 to use new Concourse features.</p><p>It&#39;s just a refinement of the same idea.</p><p>For these slides, remember that &#39;version&#39; is now called &#39;config fragment&#39;.</p>
+  </div>
+</div><div class="slide title">
+  <div class="body">
     <h1>RIP Spaces</h1>
 
     <p>2017-2019</p><p>we hardly knew ye</p>
@@ -37,7 +49,7 @@
 
   <li><p>Automatically cleaning up spaces for closed PRs, etc.</p></li>
 
-</ul>
+</ul><p>These still make sense. So why is &#39;spaces&#39; dead?</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
@@ -72,9 +84,9 @@
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Archiving implications <span class="continue">(cont'd)</span></h2>
+    <h2>Complexity estimate <span class="continue">(cont'd)</span></h2>
 
-    <p>Estimate: medium</p><p>Someone actually started on a PR for this a while back. It doesn&#39;t seem too hard.</p><p><strong>API</strong>: support archiving/unarchiving, support re-using names of archived pipelines.</p><p><strong>UX</strong>: &#39;dim&#39; and/or stash away archived pipelines.</p><p><strong>Core</strong>: don&#39;t schedule archived pipelines.</p>
+    <p>Someone actually started on a PR for this a while back. It doesn&#39;t seem too hard.</p><p><strong>API</strong>: small - support archiving/unarchiving, support re-using names of archived pipelines.</p><p><strong>UX</strong>: medium - &#39;dim&#39; and/or stash away archived pipelines.</p><p><strong>Core</strong>: x-small - don&#39;t schedule archived pipelines.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -86,16 +98,16 @@
   <div class="body">
     <h2>Instanced Pipelines <span class="continue">(cont'd)</span></h2>
 
-    <p>Pipeline templates can be &#34;instantiated&#34; with vars that become part of the pipeline&#39;s identifier.</p><div class="highlight"><pre style="">set_pipeline:<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>instance_vars:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>version:<span style="color:#e6e7e8"> </span><span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8">
-</span></pre></div><p>A build sets all instances of a pipeline - any other instances that were not set by the build become auto-archived. (This will be important later.)</p>
+    <p>Pipeline templates can be &#34;instantiated&#34; with <code>((vars))</code> that also become part of the pipeline&#39;s identifier.</p><div class="highlight"><pre style="">fly<span style="color:#e6e7e8"> </span>set-pipeline<span style="color:#e6e7e8"> </span>-p<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>-i<span style="color:#e6e7e8"> </span>version:<span style="color:#1abc9c;font-weight:bold">5.3</span><span style="color:#e6e7e8"> </span>\<span style="color:#e6e7e8">
+</span><span style="color:#e6e7e8">  </span>-c<span style="color:#e6e7e8"> </span>ci/pipelines/release.yml<span style="color:#e6e7e8">
+</span></pre></div><p>This is a small UX change that allows simple pipeline hierarchies to form - 2 levels deep instead of N.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2>Instanced Pipelines complexity <span class="continue">(cont'd)</span></h2>
+    <h2>Complexity estimate <span class="continue">(cont'd)</span></h2>
 
-    <p>Estimate: medium/large</p><p><strong>API</strong>: allow multiple instances of same pipeline name with different vars.</p><p><strong>Core</strong>: schedule all pipeline instances.</p><p><strong>UX</strong>: support navigating to instances of a pipeline. (A bit of an understatemt.)</p>
+    <p><strong>API</strong>: medium? - allow multiple instances of same pipeline name with different vars.</p><p><strong>Core</strong>: x-small - schedule all pipeline instances.</p><p><strong>UX</strong>: medium - probably a lot of navigation UX to figure out, but hopefully simpler than &#39;spaces&#39;.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -111,13 +123,34 @@
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>get:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>ci/pipelines/concourse.yml<span style="color:#e6e7e8">
-</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p><p>We can then immediately deprecate the <code>concourse-pipeline</code> resource.</p>
+</span></pre></div><p>The pipeline will be set within the team running the build, and will start un-paused.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2><code>set_pipeline</code> complexity <span class="continue">(cont'd)</span></h2>
+    <h2><code>set_pipeline</code> &#43; instances <span class="continue">(cont'd)</span></h2>
 
-    <p>Estimate: small</p><p><strong>API</strong>: support it as part of the build plan.</p><p><strong>Core</strong>: implement the step - shouldn&#39;t take too long.</p><p><strong>UX</strong>: support rendering the step.</p>
+    <p>The <code>set_pipeline</code> step can be used to &#39;sync&#39; all instances of a pipeline:</p><pre>plan:
+- get: ci
+- set_pipeline: concourse
+  file: ci/pipelines/concourse.yml
+- set_pipeline: release
+  file: ci/pipelines/release.yml
+  <strong>instance_vars</strong>: {version: 5.3}
+- set_pipeline: release
+  file: ci/pipelines/release.yml
+  <strong>instance_vars</strong>: {version: 5.2}</pre>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>set_pipeline</code> &#43; archiving <span class="continue">(cont'd)</span></h2>
+
+    <p>A build which uses <code>set_pipeline</code> for setting instances determines the full set of active instances for the pipeline.</p><p>All other instances will be automatically archived when the build completes.</p><p>This way release pipelines will automatically become archived when they&#39;re no longer relevant.</p><p>This will be more important later!</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Complexity estimate <span class="continue">(cont'd)</span></h2>
+
+    <p><strong>API</strong>: x-small - support parsing it as part of the build plan.</p><p><strong>Core</strong>: small - implement the step. medium once we do instance archiving.</p><p><strong>UX</strong>: small - support rendering the step.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -127,20 +160,31 @@
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2><code>across</code> step <span class="continue">(cont'd)</span></h2>
+    <h2><code>across</code>: build matrixes <span class="continue">(cont'd)</span></h2>
 
     <p>An <code>across</code> step runs a given step across all versions returned by a resource <code>check</code>:</p><pre><strong>across</strong>: supported-ruby-images
 <strong>as</strong>: ruby
 do:
 - task: unit
   image: ruby
-  file: ci/tasks/unit.yml</pre><p>This is the beginning of &#39;spatial resources&#39; which return a config fragment for each space.</p>
+  file: ci/tasks/unit.yml</pre><p>The <code>across</code> step can be nested to do N-dimensional matrixes.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2><code>across</code>: pipeline matrixes <span class="continue">(cont'd)</span></h2>
+
+    <p>By composing these two steps and using <code>instance_fragment</code> , we now have pipeline matrixes:</p><pre>across: concourse-branches
+as: branch
+do:
+- set_pipeline: branch
+  <strong>instance_fragment: branch</strong>
+  file: ci/pipelines/branch.yml</pre><p>When a branch goes away, its instance will become archived.</p>
   </div>
 </div><div class="slide continue">
   <div class="body">
     <h2><code>across</code> with <code>trigger</code> <span class="continue">(cont'd)</span></h2>
 
-    <p>The next step is to support <code>trigger: true</code> - this way the build will fire on <em>any</em> change to the set, i.e. fragments appearing or disappearing:</p><pre>across: concourse-branches
+    <p>The <code>across</code> step will support <code>trigger: true</code>. This way the build will fire on <em>any</em> change to the set.</p><pre>across: concourse-branches
 as: branch
 <strong>trigger: true</strong>
 do:
@@ -150,9 +194,9 @@ do:
   </div>
 </div><div class="slide continue">
   <div class="body">
-    <h2><code>across</code> complexity <span class="continue">(cont'd)</span></h2>
+    <h2>Complexity estimate <span class="continue">(cont'd)</span></h2>
 
-    <p>Estimate: medium/large</p><p><strong>API</strong>: support it as part of the build plan.</p><p><strong>Core</strong>: implement a new type of scheduling and triggering, similar to <code>get</code> step handling but for <em>sets</em> of versions. Construct a build plan that repeats the step with a <code>get</code> for each version.</p><p><strong>UX</strong>: show all the steps, probably in some sort of tab UI. There&#39;s some prior art with <code>attempts:</code>.</p>
+    <p><strong>API</strong>: x-small - support it as part of the build plan.</p><p><strong>Core</strong>: medium/large - implement a new type of scheduling and triggering, similar to <code>get</code> step handling but for <em>sets</em> of versions. Construct a build plan that repeats the step with a <code>get</code> for each version.</p><p><strong>UX</strong>: medium - show all the steps, probably in some sort of tab UI. There&#39;s some prior art with <code>attempts:</code>.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -200,15 +244,11 @@ ci/pipelines/booklit.yml
   <div class="body">
     <h2>Git Ops <span class="continue">(cont'd)</span></h2>
 
-    <p>Projects, when combined with the <code>set_pipeline</code> step, allow your entire project to be automated and reproducible:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
+    <p>Projects, when combined with the <code>set_pipeline</code> step, allow your entire project to be automated and reproducible, even in the face of pipeline templating:</p><div class="highlight"><pre style="">name:<span style="color:#e6e7e8"> </span>ci<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>concourse<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>task:<span style="color:#e6e7e8"> </span>generate-template<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>fancy-templated-pipeline<span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8">  </span>file:<span style="color:#e6e7e8"> </span>generated-pipeline/foo.yml<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8"></span>-<span style="color:#e6e7e8"> </span>set_pipeline:<span style="color:#e6e7e8"> </span>release-<span style="color:#1abc9c;font-weight:bold">5.2</span>.x<span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>pipeline:<span style="color:#e6e7e8"> </span>release<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># pipelines/release.yml</span><span style="color:#e6e7e8">
-</span><span style="color:#e6e7e8">  </span>vars:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
 </span></pre></div>
   </div>
 </div><div class="slide continue">
@@ -237,6 +277,12 @@ ci/pipelines/booklit.yml
 </span><span style="color:#e6e7e8">
 </span><span style="color:#e6e7e8"></span>plan:<span style="color:#e6e7e8"> </span><span style="color:#9b9b9b"># ...</span><span style="color:#e6e7e8">
 </span></pre></div><p>The proximity to <code>plan:</code> makes it easy to audit credential access within the project.</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Complexity estimate <span class="continue">(cont'd)</span></h2>
+
+    <p><strong>API</strong>: medium - there&#39;s a new object owner in town, so I expect some API noise. Maybe we should invest in non-hierarchical URLs at this point?</p><p><strong>Core</strong>: medium/large - this is a bit of an epic, but it&#39;s at least grounded in well-understood ideas (i.e. build plans). I think there are interesting, relatively simple ways to design this.</p><p><strong>UX</strong>: medium/large - we&#39;ll need project builds to show up in the UI somewhere. And we&#39;ll probably want to think about any navigation implications.</p>
   </div>
 </div><div class="slide title">
   <div class="body">
@@ -298,9 +344,15 @@ plan:
     <strong>set_pipeline</strong>: branch
     <strong>instance_fragment</strong>: branch</pre>
   </div>
-</div><div class="slide">
+</div><div class="slide title">
   <div class="body">
-    <h2>Broken metaphor</h2>
+    <h1>your metaphor sucks</h1>
+
+    <p>a brief side-tangent</p>
+  </div>
+</div><div class="slide continue">
+  <div class="body">
+    <h2>Broken metaphor <span class="continue">(cont'd)</span></h2>
 
     <p>...Ok, the Exodia metaphor is a little broken.</p><p>With Exodia, each card on its own is completely worthless until you have all five.</p><p>The entire point of this roadmap is that each feature is useful independently.</p>
   </div>
@@ -363,6 +415,26 @@ plan:
     <h2>De-risked roadmap <span class="continue">(cont'd)</span></h2>
 
     <p>For a long while now &#39;spaces&#39; has been thought of as one big feature with a whole lot of implications.</p><p>By thinking about it as the intersection of five smaller features, our roadmap is heavily de-risked.</p>
+  </div>
+</div><div class="slide">
+  <div class="body">
+    <h2>So...what&#39;s the roadmap?</h2>
+
+    <ul>
+
+  <li><p>Resources v2: let&#39;s finally implement this</p></li>
+
+  <li><p><code>set_pipeline</code> step: deprecate <code>concourse-pipeline</code> resource</p></li>
+
+  <li><p>Projects: smoothen learning curve</p></li>
+
+  <li><p>Archiving pipelines: nice-to-have</p></li>
+
+  <li><p>Instanced pipelines: automatic archiving, figure out nav</p></li>
+
+  <li><p><code>across</code> step: open the spatial floodgates</p></li>
+
+</ul>
   </div>
 </div><div class="slide">
   <div class="body">
