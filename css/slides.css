@@ -86,3 +86,7 @@
 .slide .small-screen img {
   height: 295px;
 }
+.slide a,
+.slide a:visited {
+  color: #2d76cc;
+}
