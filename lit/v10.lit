@@ -348,6 +348,34 @@
   }
 }
 
+\detail{Simpler build plans}{
+  \side-by-side{
+    Before:
+
+    \code{{
+    in_parallel:
+    - task: fly-linux
+      file: ci/tasks/fly-linux.yml
+    - task: fly-darwin
+      file: ci/tasks/fly-darwin.yml
+    - task: fly-windows
+      file: ci/tasks/fly-windows.yml
+    }}
+  }{
+    After:
+
+    \code{{
+    in_parallel:
+    - task: fly-linux
+    - task: fly-darwin
+    - task: fly-windows
+    }}
+  }
+
+  This reads a lot better, builds on existing usage patterns, and task names
+  are actually useful now!
+}
+
 \detail{Project-level creds}{
   Projects define credential managers as \code{var_sources}:
 
@@ -361,8 +389,8 @@
   plan: # ...
   }}
 
-  The proximity to \code{plan:} makes it easy to audit credential access within
-  the project.
+  The proximity to \code{plan:} makes it easy to visibly audit credential
+  access within the project.
 }
 
 \detail{Complexity estimate}{
@@ -501,7 +529,7 @@
   By then, the only new concept is \code{passed} constraints.
 }
 
-\detail{Fan-in across pipelines}{
+\detail{Inter-dependent pipelines}{
   \bold{Projects} allow pipelines to reference each other in \code{passed}
   constraints.
 
@@ -523,7 +551,7 @@
   }
 }
 
-\detail{Pipeline sub-naming}{
+\detail{Pipeline hierarchies}{
   \bold{Pipeline instances} allow for a common pipeline template to use some of
   its \code{((vars))} as part of the pipeline identifier.
 

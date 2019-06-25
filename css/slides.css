@@ -90,3 +90,16 @@
 .slide a:visited {
   color: #2d76cc;
 }
+.side-by-side {
+  display: flex;
+  flex-direction: row;
+}
+.side-by-side-cell {
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 0;
+  margin-left: 2em;
+}
+.side-by-side-cell:first-child {
+  margin-left: 0;
+}

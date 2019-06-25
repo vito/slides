@@ -121,3 +121,19 @@
     color: @blue-secondary;
   }
 }
+
+.side-by-side {
+  display: flex;
+  flex-direction: row;
+}
+
+.side-by-side-cell {
+  flex-grow: 1;
+  flex-shrink: 0;
+  flex-basis: 0;
+  margin-left: 2em;
+
+  &:first-child {
+    margin-left: 0;
+  }
+}
