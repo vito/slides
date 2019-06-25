@@ -118,3 +118,11 @@ func (p Plugin) Youtube(id booklit.Content) booklit.Content {
 		Content: id,
 	}
 }
+
+func (p Plugin) SideBySide(content ...booklit.Content) booklit.Content {
+	return booklit.Styled{
+		Style:   "side-by-side",
+		Block:   true,
+		Content: booklit.Sequence(content),
+	}
+}
