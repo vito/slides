@@ -80,7 +80,7 @@
 }
 
 \title-slide{Archiving Pipelines}{
-  \exodia{img/exodia-right-leg.png}
+  \exodia{img/exodia-right-arm.png}
 }
 
 \detail{Archiving Pipelines}{
@@ -110,7 +110,7 @@
 }
 
 \title-slide{Instanced Pipelines}{
-  \exodia{img/exodia-left-leg.png}
+  \exodia{img/exodia-left-arm.png}
 }
 
 \detail{Instanced Pipelines}{
@@ -118,9 +118,9 @@
   become part of the pipeline's identifier.
 
   \codeblock{yml}{{
-  fly set-pipeline -p release \\
-    -i version:5.3 \\
-    -c ci/pipelines/release.yml
+  $ fly set-pipeline -p release \\
+      -i version:5.3 \\
+      -c ci/pipelines/release.yml
   }}
 
   This is a small UX change that allows simple pipeline hierarchies to form - 2
@@ -138,17 +138,17 @@
 }
 
 \title-slide{\code{set_pipeline} step}{
-  \exodia{img/exodia-right-arm.png}
+  \exodia{img/exodia-right-leg.png}
 }
 
 \detail{\code{set_pipeline} step}{
   Pipelines can be configured by using a new \code{set_pipeline} step in a
   build plan:
 
-  \codeblock{yaml}{{
+  \code{{
   plan:
   - get: ci
-  - set_pipeline: concourse
+  - \bold{set_pipeline: concourse}
     file: ci/pipelines/concourse.yml
   }}
 
@@ -167,10 +167,10 @@
     file: ci/pipelines/concourse.yml
   - set_pipeline: release
     file: ci/pipelines/release.yml
-    \bold{instance_vars}: \{version: 5.3\}
+    \bold{instance_vars: \{version: 5.3\}}
   - set_pipeline: release
     file: ci/pipelines/release.yml
-    \bold{instance_vars}: \{version: 5.2\}
+    \bold{instance_vars: \{version: 5.2\}}
   }}
 }
 
@@ -196,7 +196,7 @@
 }
 
 \title-slide{\code{across} step}{
-  \exodia{img/exodia-left-arm.png}
+  \exodia{img/exodia-left-leg.png}
 }
 
 \detail{\code{across}: build matrixes}{
@@ -275,12 +275,15 @@
   Projects are configured with \code{fly set-project}:
 
   \codeblock{sh}{{
-    fly -t ci set-project \\
+  $ fly -t ci set-project \\
       --project booklit \\
       --type git \\
       --source uri=https://github.com/vito/booklit \\
-      --path ci
+      --config-path ci
   }}
+
+  The \code{--config-path} flag identifies the sub-directory within the
+  resource from which to load the project config.
 }
 
 \detail{Project structure}{
@@ -316,9 +319,12 @@
 
 \detail{Git Ops}{
   Projects, when combined with the \code{set_pipeline} step, allow your entire
-  project to be automated and reproducible, even in the face of pipeline templating:
+  project to be automated and reproducible.
 
-  \codeblock{yaml}{{
+  It's a full blown build plan, you can even do pipeline templating if
+  necessary:
+
+  \code{{
   name: ci
   plan:
   - \bold{task: generate-template}
@@ -345,10 +351,10 @@
 \detail{Project-level creds}{
   Projects define credential managers as \code{var_sources}:
 
-  \codeblock{yml}{{
+  \code{{
   name: ci
 
-  var_sources:
+  \bold{var_sources}:
   - type: vault
     config: # ...
 
@@ -399,7 +405,8 @@
 
   \codeblock{sh}{{
   fly set-project -p booklit -t git \\
-    -s uri=https://github.com/vito/booklit
+    -s uri=https://github.com/vito/booklit \\
+    -c ci
   }}
 
   This should feel intuitive for smaller projects which may not need a
@@ -418,9 +425,8 @@
   - \bold{set_pipeline}: prs
   }}
 
-  Though in this case it might make more sense for \code{prs} to be a separate
-  project so it doesn't share the credential manager config. (Or maybe we could
-  have pipelines associated to credential managers?)
+  In this case it might make more sense for \code{prs} to be a separate
+  project so it doesn't share the credential manager config.
 }
 
 \detail{Demo 3: spatial pipelines}{
@@ -428,15 +434,15 @@
   \bold{name}: ci
   \bold{plan}:
   - \bold{set_pipeline}: concourse
-  - \bold{across}: branch
-    resource: release-branches
+  - \bold{across}: release-branches
+    as: branch
     do:
-      \bold{set_pipeline}: release
+    - \bold{set_pipeline}: release
       \bold{instance_fragment}: branch
-  - \bold{across}: branch
-    resource: feature-branches
+  - \bold{across}: feature-branches
+    as: branch
     do:
-      \bold{set_pipeline}: branch
+    - \bold{set_pipeline}: branch
       \bold{instance_fragment}: branch
   }}
 }
