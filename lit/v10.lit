@@ -7,6 +7,22 @@
   \youtube{YHRyirjO5rM}
 }
 
+\title-slide{Resources v2}{
+  an abridged update
+}
+
+\detail{Resources v2}{
+  Resources v2 is now an idea of a 'generalized resource interface', decoupled
+  from artifact versioning.
+
+  Users will be able to use v1 and v2 resources side-by-side, and users won't
+  even have to upgrade to v2 to use new Concourse features.
+
+  It's just a refinement of the same idea.
+
+  For these slides, remember that 'version' is now called 'config fragment'.
+}
+
 \title-slide{RIP Spaces}{
   2017-2019
 
@@ -23,6 +39,8 @@
   }{
     Automatically cleaning up spaces for closed PRs, etc.
   }
+
+  These still make sense. So why is 'spaces' dead?
 }
 
 \detail{Analysis paralysis}{
@@ -79,18 +97,16 @@
   "instanced pipelines."
 }
 
-\detail{Archiving implications}{
-  Estimate: medium
-
+\detail{Complexity estimate}{
   Someone actually started on a PR for this a while back. It doesn't seem too
   hard.
 
-  \bold{API}: support archiving/unarchiving, support re-using names of archived
-  pipelines.
+  \bold{API}: small - support archiving/unarchiving, support re-using names of
+  archived pipelines.
 
-  \bold{UX}: 'dim' and/or stash away archived pipelines.
+  \bold{UX}: medium - 'dim' and/or stash away archived pipelines.
 
-  \bold{Core}: don't schedule archived pipelines.
+  \bold{Core}: x-small - don't schedule archived pipelines.
 }
 
 \title-slide{Instanced Pipelines}{
@@ -98,29 +114,27 @@
 }
 
 \detail{Instanced Pipelines}{
-  Pipeline templates can be "instantiated" with vars that become part of the
-  pipeline's identifier.
+  Pipeline templates can be "instantiated" with \code{((vars))} that also
+  become part of the pipeline's identifier.
 
   \codeblock{yml}{{
-  set_pipeline: release
-  instance_vars:
-    version: 5.3
+  fly set-pipeline -p release \\
+    -i version:5.3 \\
+    -c ci/pipelines/release.yml
   }}
 
-  A build sets all instances of a pipeline - any other instances that were not
-  set by the build become auto-archived. (This will be important later.)
+  This is a small UX change that allows simple pipeline hierarchies to form - 2
+  levels deep instead of N.
 }
 
-\detail{Instanced Pipelines complexity}{
-  Estimate: medium/large
+\detail{Complexity estimate}{
+  \bold{API}: medium? - allow multiple instances of same pipeline name with
+  different vars.
 
-  \bold{API}: allow multiple instances of same pipeline name with different
-  vars.
+  \bold{Core}: x-small - schedule all pipeline instances.
 
-  \bold{Core}: schedule all pipeline instances.
-
-  \bold{UX}: support navigating to instances of a pipeline. (A bit of an
-  understatemt.)
+  \bold{UX}: medium - probably a lot of navigation UX to figure out, but
+  hopefully simpler than 'spaces'.
 }
 
 \title-slide{\code{set_pipeline} step}{
@@ -140,25 +154,52 @@
 
   The pipeline will be set within the team running the build, and will start
   un-paused.
-
-  We can then immediately deprecate the \code{concourse-pipeline} resource.
 }
 
-\detail{\code{set_pipeline} complexity}{
-  Estimate: small
+\detail{\code{set_pipeline} + instances}{
+  The \code{set_pipeline} step can be used to 'sync' all instances of a
+  pipeline:
 
-  \bold{API}: support it as part of the build plan.
+  \code{{
+  plan:
+  - get: ci
+  - set_pipeline: concourse
+    file: ci/pipelines/concourse.yml
+  - set_pipeline: release
+    file: ci/pipelines/release.yml
+    \bold{instance_vars}: \{version: 5.3\}
+  - set_pipeline: release
+    file: ci/pipelines/release.yml
+    \bold{instance_vars}: \{version: 5.2\}
+  }}
+}
 
-  \bold{Core}: implement the step - shouldn't take too long.
+\detail{\code{set_pipeline} + archiving}{
+  A build which uses \code{set_pipeline} for setting instances determines the
+  full set of active instances for the pipeline.
 
-  \bold{UX}: support rendering the step.
+  All other instances will be automatically archived when the build completes.
+
+  This way release pipelines will automatically become archived when they're no
+  longer relevant.
+
+  This will be more important later!
+}
+
+\detail{Complexity estimate}{
+  \bold{API}: x-small - support parsing it as part of the build plan.
+
+  \bold{Core}: small - implement the step. medium once we do instance
+  archiving.
+
+  \bold{UX}: small - support rendering the step.
 }
 
 \title-slide{\code{across} step}{
   \exodia{img/exodia-left-arm.png}
 }
 
-\detail{\code{across} step}{
+\detail{\code{across}: build matrixes}{
   An \code{across} step runs a given step across all versions returned by a
   resource \code{check}:
 
@@ -171,14 +212,28 @@
     file: ci/tasks/unit.yml
   }}
 
-  This is the beginning of 'spatial resources' which return a config fragment
-  for each space.
+  The \code{across} step can be nested to do N-dimensional matrixes.
+}
+
+\detail{\code{across}: pipeline matrixes}{
+  By composing these two steps and using \code{instance_fragment} , we now have
+  pipeline matrixes:
+
+  \code{{
+  across: concourse-branches
+  as: branch
+  do:
+  - set_pipeline: branch
+    \bold{instance_fragment: branch}
+    file: ci/pipelines/branch.yml
+  }}
+
+  When a branch goes away, its instance will become archived.
 }
 
 \detail{\code{across} with \code{trigger}}{
-  The next step is to support \code{trigger: true} - this way the build will
-  fire on \italic{any} change to the set, i.e. fragments appearing or
-  disappearing:
+  The \code{across} step will support \code{trigger: true}. This way the build
+  will fire on \italic{any} change to the set.
 
   \code{{
   across: concourse-branches
@@ -191,17 +246,16 @@
   }}
 }
 
-\detail{\code{across} complexity}{
-  Estimate: medium/large
+\detail{Complexity estimate}{
+  \bold{API}: x-small - support it as part of the build plan.
 
-  \bold{API}: support it as part of the build plan.
+  \bold{Core}: medium/large - implement a new type of scheduling and
+  triggering, similar to \code{get} step handling but for \italic{sets} of
+  versions. Construct a build plan that repeats the step with a \code{get} for
+  each version.
 
-  \bold{Core}: implement a new type of scheduling and triggering, similar to
-  \code{get} step handling but for \italic{sets} of versions. Construct a build
-  plan that repeats the step with a \code{get} for each version.
-
-  \bold{UX}: show all the steps, probably in some sort of tab UI. There's some
-  prior art with \code{attempts:}.
+  \bold{UX}: medium - show all the steps, probably in some sort of tab UI.
+  There's some prior art with \code{attempts:}.
 }
 
 \title-slide{Projects}{
@@ -262,18 +316,14 @@
 
 \detail{Git Ops}{
   Projects, when combined with the \code{set_pipeline} step, allow your entire
-  project to be automated and reproducible:
+  project to be automated and reproducible, even in the face of pipeline templating:
 
   \codeblock{yaml}{{
   name: ci
   plan:
-  - set_pipeline: concourse
-  - task: generate-template
+  - \bold{task: generate-template}
   - set_pipeline: fancy-templated-pipeline
     file: generated-pipeline/foo.yml
-  - set_pipeline: release-5.2.x
-    pipeline: release # pipelines/release.yml
-    vars: # ...
   }}
 }
 
@@ -307,6 +357,19 @@
 
   The proximity to \code{plan:} makes it easy to audit credential access within
   the project.
+}
+
+\detail{Complexity estimate}{
+  \bold{API}: medium - there's a new object owner in town, so I expect some API
+  noise. Maybe we should invest in non-hierarchical URLs at this point?
+
+  \bold{Core}: medium/large - this is a bit of an epic, but it's at least
+  grounded in well-understood ideas (i.e. build plans). I think there are
+  interesting, relatively simple ways to design this.
+
+  \bold{UX}: medium/large - we'll need project builds to show up in the UI
+  somewhere. And we'll probably want to think about any navigation
+  implications.
 }
 
 \title-slide{Putting it all together...}{
@@ -378,7 +441,11 @@
   }}
 }
 
-\slide{Broken metaphor}{
+\title-slide{your metaphor sucks}{
+  a brief side-tangent
+}
+
+\detail{Broken metaphor}{
   ...Ok, the Exodia metaphor is a little broken.
 
   With Exodia, each card on its own is completely worthless until you have all
@@ -477,6 +544,22 @@
 
   By thinking about it as the intersection of five smaller features, our
   roadmap is heavily de-risked.
+}
+
+\slide{So...what's the roadmap?}{
+  \list{
+    Resources v2: let's finally implement this
+  }{
+    \code{set_pipeline} step: deprecate \code{concourse-pipeline} resource
+  }{
+    Projects: smoothen learning curve
+  }{
+    Archiving pipelines: nice-to-have
+  }{
+    Instanced pipelines: automatic archiving, figure out nav
+  }{
+    \code{across} step: open the spatial floodgates
+  }
 }
 
 \slide{References}{
