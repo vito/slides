@@ -86,6 +86,13 @@
 .slide .small-screen img {
   height: 295px;
 }
+.slide .stone img {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 150px;
+  border-radius: 1em;
+}
 .slide a,
 .slide a:visited {
   color: #2d76cc;

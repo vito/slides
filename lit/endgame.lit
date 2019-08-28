@@ -1,0 +1,78 @@
+\title{Concourse: Endgame}{endgame}
+
+\use-plugin{slides}
+\styled{slides}
+
+\title-slide{Concourse: Endgame}{
+  \media{img/endgame.jpg}
+}
+
+\title-slide{Pride}{
+  \media{img/power-stone.png}{stone}
+
+  We should have pride in our product, codebase, and community.
+}
+
+\slide{Honesty}{
+  \media{img/reality-stone.png}{stone}
+
+  I should have a clear sense of when I should use Concourse.
+
+  Communicate our strengths, be honest about our weaknesses.
+
+  Don't get burned by ambition. Prevent bad user experiences.
+
+  Provide warnings for common pitfalls or weaknesses, and "here it is on our
+  roadmap" when applicable.
+
+  Maybe this is just a FAQ.
+}
+
+\detail{Example: pull requests}{
+  People have been struggling with Concourse for branch/PR workflows for a
+  long time.
+
+  We should add a disclaimer somewhere, and mention our v10 roadmap as our
+  long-term strategy.
+
+  It's better to have them wait and use other tools than have them struggle.
+}
+
+\slide{Clarity}{
+  \media{img/mind-stone.png}{stone}
+
+  It should be easy understand what Concourse is doing.
+
+  \list{
+    "Why is my task taking 5 minutes to initialize?"
+  }{
+    "What the hell are these JSON logs?"
+  }{
+    "Where is the system stuck?"
+  }
+
+  (We really need to re-design our logs.)
+}
+
+\slide{Resiliency}{
+  \media{img/time-stone.png}{stone}
+
+  I should be able to trust Concourse.
+
+  It should be durable to predictable failure modes, i.e. failing or stuck
+  workers.
+
+  When it fails, it should be easy to find out why.
+}
+
+\slide{Growth}{
+  \media{img/space-stone.png}{stone}
+
+  The rate of important epics to implement should go down.
+
+  This can be achieved through Concourse's design principles of loosely
+  coupled, versatile abstractions.
+
+  We should have the capacity to spend our time and energy on UX,
+  documentation, examples, and even conferences.
+}

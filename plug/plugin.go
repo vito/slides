@@ -23,7 +23,7 @@ func NewPlugin(section *booklit.Section) booklit.Plugin {
 	}
 }
 
-func (p Plugin) Exodia(path string, style ...string) booklit.Content {
+func (p Plugin) Media(path string, style ...string) booklit.Content {
 	content := booklit.Image{
 		Path:        path,
 		Description: "",

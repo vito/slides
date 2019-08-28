@@ -80,7 +80,7 @@
 }
 
 \title-slide{Archiving Pipelines}{
-  \exodia{img/exodia-right-arm.png}
+  \media{img/exodia-right-arm.png}
 }
 
 \detail{Archiving Pipelines}{
@@ -110,7 +110,7 @@
 }
 
 \title-slide{Instanced Pipelines}{
-  \exodia{img/exodia-left-arm.png}
+  \media{img/exodia-left-arm.png}
 }
 
 \detail{Instanced Pipelines}{
@@ -138,7 +138,7 @@
 }
 
 \title-slide{\code{set_pipeline} step}{
-  \exodia{img/exodia-right-leg.png}
+  \media{img/exodia-right-leg.png}
 }
 
 \detail{\code{set_pipeline} step}{
@@ -196,7 +196,7 @@
 }
 
 \title-slide{\code{across} step}{
-  \exodia{img/exodia-left-leg.png}
+  \media{img/exodia-left-leg.png}
 }
 
 \detail{\code{across}: build matrixes}{
@@ -259,7 +259,7 @@
 }
 
 \title-slide{Projects}{
-  \exodia{img/exodia-head.png}
+  \media{img/exodia-head.png}
 }
 
 \detail{What is a project?}{
@@ -407,7 +407,7 @@
 }
 
 \title-slide{Putting it all together...}{
-  \exodia{img/exodia-together.jpg}
+  \media{img/exodia-together.jpg}
 }
 
 \detail{Spaces?}{
@@ -493,11 +493,11 @@
   A better metaphor would be "Blue Eyes White Dragon":
 
   \center{
-    \exodia{img/blue-eyes-white-dragon.png}{small-card}
-    \exodia{img/blue-eyes-white-dragon.png}{small-card}
-    \exodia{img/blue-eyes-white-dragon.png}{small-card}
+    \media{img/blue-eyes-white-dragon.png}{small-card}
+    \media{img/blue-eyes-white-dragon.png}{small-card}
+    \media{img/blue-eyes-white-dragon.png}{small-card}
     =
-    \exodia{img/blue-eyes-ultimate-dragon.png}{small-card}
+    \media{img/blue-eyes-ultimate-dragon.png}{small-card}
   }
 
   ...but we have five features, not three.
@@ -507,8 +507,8 @@
   And we all know how that turned out anyway.
 
   \center{
-    \exodia{img/yugi-exodia-head.jpg}{small-screen}
-    \exodia{img/kaiba.png}{small-screen}
+    \media{img/yugi-exodia-head.jpg}{small-screen}
+    \media{img/kaiba.png}{small-screen}
   }
 }
 
